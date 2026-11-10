@@ -22,7 +22,7 @@ export async function startFakePayPal() {
     let m;
     if ((m = p.match(/^\/v2\/checkout\/orders\/([^/]+)$/))) {
       const o = state.orders[m[1]]; if (!o) return send(404, { name: 'RESOURCE_NOT_FOUND' });
-      return send(200, { id: o.id, status: o.status, purchase_units: [{ payments: { captures: o.capture ? [o.capture] : [] } }] });
+      return send(200, { id: o.id, status: o.status, purchase_units: [{ payee: { email_address: 'merchant@rios.test' }, payments: { captures: o.capture ? [o.capture] : [] } }] });
     }
     if ((m = p.match(/^\/v2\/checkout\/orders\/([^/]+)\/capture$/))) {
       const o = state.orders[m[1]];

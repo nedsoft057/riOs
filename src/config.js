@@ -31,6 +31,8 @@ export function loadConfig(env = process.env) {
     currency: env.RIOS_CURRENCY || 'USD',
     // Fee in basis points of the deposit (200 = 2%). Off for the hackathon.
     feeBps: Number(env.RIOS_FEE_BPS || 0),
+    // PayPal account riOs collects into; riOs refuses to pay it as a provider. Learned automatically if unset.
+    merchantEmail: (env.RIOS_MERCHANT_EMAIL || '').trim().toLowerCase() || null,
     cancelWindowHours: Number(env.RIOS_CANCEL_WINDOW_HOURS || 72),
     maxMonths: Number(env.RIOS_MAX_MONTHS || 24),
     maxMonthlyCents: Number(env.RIOS_MAX_MONTHLY_CENTS || 100000),
