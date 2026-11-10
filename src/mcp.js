@@ -74,8 +74,8 @@ export const TOOLS = [
   {
     name: 'rios_cancel_deposit',
     title: 'Cancel a deposit',
-    description: 'Cancel a deposit within 3 days of approval and refund the part not yet paid out to the user\'s PayPal. After 3 days deposits are locked and this will refuse. Confirm with the user before calling.',
-    inputSchema: { type: 'object', additionalProperties: false, required: ['deposit_id'], properties: { deposit_id: str('From rios_list_subscriptions (cancellable_deposits)') } },
+    description: 'Cancel a deposit within 3 days of approval and refund the part not yet paid out to the user\'s PayPal. After 3 days deposits are locked and this will refuse. Also cancels a funding that is still waiting for approval (nothing was paid, so nothing is refunded). Confirm with the user before calling.',
+    inputSchema: { type: 'object', additionalProperties: false, required: ['deposit_id'], properties: { deposit_id: str('From rios_list_subscriptions (cancellable_deposits or waiting_for_approval)') } },
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   },
   {

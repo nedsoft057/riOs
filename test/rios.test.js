@@ -266,3 +266,25 @@ test('signup page creates a working key', async () => {
     assert.equal(ping.status, 200);
   } finally { h.close(); }
 });
+
+test('riOs refuses to pay its own PayPal account', async () => {
+  const { vault } = setup();
+  const { user } = await vault.createUser('A');
+  await fundedSub(vault, user);   // first order teaches riOs its merchant email
+  await assert.rejects(vault.addSubscription(user, { name: 'Self', payee_email: 'Merchant@rios.test', monthly_amount: '5' }), /riOs PayPal account itself/);
+  const { vault: v2 } = setup({ RIOS_MERCHANT_EMAIL: 'me@rios.test' });
+  const { user: u2 } = await v2.createUser('B');
+  await assert.rejects(v2.addSubscription(u2, { name: 'Self', payee_email: 'me@rios.test', monthly_amount: '5' }), /riOs PayPal account itself/);
+});
+
+test('an abandoned checkout can be cancelled, then the subscription removed', async () => {
+  const { vault } = setup();
+  const { user } = await vault.createUser('A');
+  const sub = await vault.addSubscription(user, { name: 'Tool', payee_email: 'p@example.com', monthly_amount: '5' });
+  const f = await vault.startFunding(user, sub.subscription_id, 2);
+  await assert.rejects(vault.removeSubscription(user, sub.subscription_id), /rios_cancel_deposit/);
+  const c = await vault.cancelDeposit(user, f.deposit_id);
+  assert.equal(c.status, 'cancelled');
+  const r = await vault.removeSubscription(user, sub.subscription_id);
+  assert.equal(r.removed, true);
+});

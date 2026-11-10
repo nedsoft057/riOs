@@ -44,6 +44,9 @@ export class Vault {
     if (!isEmail(payee_email)) throw new UserError('payee_email must be the PayPal email address that receives the payments');
     const monthlyCents = toCents(monthly_amount, 'monthly_amount');
     if (monthlyCents < 100 || monthlyCents > this.cfg.maxMonthlyCents) throw new UserError(`monthly_amount must be between 1.00 and ${money(this.cfg.maxMonthlyCents)}`);
+    const payee = payee_email.trim().toLowerCase();
+    const owner = await this.merchantEmail();
+    if (owner && payee === owner) throw new UserError(`${payee} is the riOs PayPal account itself, so riOs would be paying itself. Use the provider's own PayPal email.`);
     const t = today(this.now());
     const next = next_billing_date ? parseDate(next_billing_date, 'next_billing_date') : t;
     if (next < t) throw new UserError('next_billing_date cannot be in the past');
@@ -72,11 +75,17 @@ export class Vault {
       const sub = ownSub(db, user, subscriptionId);
       const deps = db.deposits.filter(d => d.subscriptionId === sub.id);
       if (balanceOf(deps) > 0) throw new UserError('This subscription still has locked funds. It keeps paying until they run out, then you can remove it.');
-      if (deps.some(d => d.status === 'pending')) throw new UserError('There is a funding waiting for approval. Approve or cancel it in PayPal first.');
+      if (deps.some(d => d.status === 'pending')) throw new UserError(`There is a funding waiting for approval (${deps.find(d => d.status === 'pending').id}). Approve it, or cancel it with rios_cancel_deposit, then remove the subscription.`);
       sub.status = 'removed';
       log(db, user.id, 'subscription_removed', { subscriptionId: sub.id }, this.now());
       return { removed: true, subscription_id: sub.id, name: sub.name };
     });
+  }
+
+  // The PayPal account riOs collects into (learned from the first order, or set with RIOS_MERCHANT_EMAIL).
+  async merchantEmail() {
+    if (this.cfg.merchantEmail) return this.cfg.merchantEmail;
+    return this.store.transact(db => db.meta?.merchantEmail || null);
   }
 
   // ---------- funding ----------
@@ -102,8 +111,10 @@ export class Vault {
 
   async startFunding(user, subscriptionId, months) {
     months = this.checkMonths(months);
+    const owner = await this.merchantEmail();
     const dep = await this.store.transact(db => {
       const sub = ownSub(db, user, subscriptionId);
+      if (owner && sub.payeeEmail === owner) throw new UserError(`This subscription pays ${owner}, which is the riOs PayPal account itself, so renewals would fail. Add the subscription again with the provider's own PayPal email.`);
       if (sub.status !== 'active') throw new UserError('This subscription is paused. Check its status first.');
       const open = db.deposits.filter(d => d.subscriptionId === sub.id && d.status === 'pending');
       if (open.length >= 3) throw new UserError('There are already 3 fundings waiting for approval for this subscription. Approve or cancel those first.');
@@ -156,6 +167,8 @@ export class Vault {
     if (!dep.orderId) throw new UserError('This funding has no PayPal order yet. Start a new funding.');
 
     const order = await this.paypal.getOrder(dep.orderId);
+    const merchant = order.purchase_units?.[0]?.payee?.email_address;
+    if (merchant) await this.store.transact(db => { db.meta = db.meta || {}; if (!db.meta.merchantEmail) db.meta.merchantEmail = merchant.toLowerCase(); });
     let cap = null;
     if (order.status === 'APPROVED') cap = await this.paypal.captureOrder(dep.orderId, `capture-${dep.id}`);
     else if (order.status === 'COMPLETED') {
