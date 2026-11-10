@@ -8,6 +8,7 @@
 //   GET  /health
 import { handleMessage, SERVER_INFO } from './mcp.js';
 import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
+import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage } from './web.js';
 
 const MAX_BODY = 1_000_000;
 
@@ -22,7 +23,9 @@ export function createHandler({ vault, config }) {
       if (path === '/health') return json(res, 200, { ok: true, server: { name: SERVER_INFO.name, title: SERVER_INFO.title, version: SERVER_INFO.version }, paypal: config.paypal.env });
       if (path === '/icon.png' || path === '/apple-touch-icon.png') return png(res, ICON_PNG_256);
       if (path === '/favicon.ico' || path === '/favicon.png') return png(res, ICON_PNG_48);
-      if (path === '/' && req.method === 'GET') return html(res, 200, page('riOs MCP server', `<p>This is the riOs MCP server. Connect your AI assistant to <code>${esc(config.publicUrl)}/mcp</code>.</p><p><a href="/signup">Get an API key</a></p>`));
+      if (path === '/' && req.method === 'GET') return html(res, 200, homePage());
+      if (path === '/app' && req.method === 'GET') return html(res, 200, consolePage(config.publicUrl));
+      if (path.startsWith('/v1/')) return api(req, res, path, url);
 
       if (path === '/mcp' || path.startsWith('/mcp/k/')) {
         if (req.method === 'GET') { res.setHeader('Allow', 'POST'); return json(res, 405, { error: 'Use POST for MCP requests' }); }
@@ -48,32 +51,30 @@ export function createHandler({ vault, config }) {
 
       if (path === '/paypal/return') {
         const depositId = url.searchParams.get('deposit'); const orderId = url.searchParams.get('token');
-        if (!depositId || !orderId) return html(res, 400, page('Missing details', '<p>This link is incomplete. Go back to your AI assistant and ask it to check your funding.</p>'));
+        if (!depositId || !orderId) return html(res, 400, messagePage('Missing details', 'This link is incomplete. Go back to your AI and ask it to check your funding.'));
         try {
           const d = await vault.confirmFunding(depositId, { orderId });
-          if (d.status === 'locked') {
-            return html(res, 200, page('You\'re covered', `<p class="big">✓ ${esc(d.subscription)} is funded for ${d.months} month${d.months > 1 ? 's' : ''}.</p><p>${esc(d.covers)} is now locked and riOs will pay each renewal on time.</p><p>You can close this page and go back to your AI assistant.</p>`));
-          }
-          return html(res, 200, page('Almost there', `<p>PayPal hasn't completed this payment yet. Ask your AI assistant to check the funding again in a minute.</p>`));
+          if (d.status === 'locked') return html(res, 200, coveredPage(d));
+          return html(res, 200, messagePage('Almost there', "PayPal hasn't completed this payment yet. Ask your AI to check the funding again in a minute."));
         } catch (e) {
           if (!e.user) console.error('[rios] paypal return failed:', e);
-          return html(res, e.user ? 404 : 502, page('Something went wrong', `<p>${esc(e.user ? e.message : 'We could not confirm the payment with PayPal right now.')}</p><p>Your money is safe. Ask your AI assistant to check the funding again.</p>`));
+          return html(res, e.user ? 404 : 502, messagePage('Something went wrong', `${esc(e.user ? e.message : 'We could not confirm the payment with PayPal right now.')} Your money is safe. Ask your AI to check the funding again.`));
         }
       }
 
       if (path === '/paypal/cancel') {
         const depositId = url.searchParams.get('deposit');
         if (depositId) await vault.markFundingCancelled(depositId);
-        return html(res, 200, page('Payment cancelled', '<p>No money was taken. You can start a new funding from your AI assistant any time.</p>'));
+        return html(res, 200, messagePage('Payment cancelled', 'No money was taken. You can start a new funding from your AI or your console any time.', 'Nothing charged'));
       }
 
       if (path === '/signup') {
-        if (!config.allowSignup) return html(res, 403, page('Sign-ups are closed', '<p>New accounts are not open right now.</p>'));
-        if (req.method === 'GET') return html(res, 200, page('Get your riOs key', signupForm()));
+        if (!config.allowSignup) return html(res, 403, messagePage('Sign-ups are closed', 'New accounts are not open right now.'));
+        if (req.method === 'GET') return html(res, 200, signupPage());
         if (req.method === 'POST') {
           const body = await readForm(req);
           const { user, apiKey } = await vault.createUser(body.name);
-          return html(res, 200, page('Your riOs key', keyPage(config, user, apiKey)));
+          return html(res, 200, keyPage(config.publicUrl, user, apiKey));
         }
       }
 
@@ -88,6 +89,29 @@ export function createHandler({ vault, config }) {
       return json(res, 500, { error: 'Internal error' });
     }
   };
+
+  // JSON API for the console (/v1/...; /api is taken by Vercel's function path). Same key as MCP, sent as "Authorization: Bearer <key>".
+  async function api(req, res, path, url) {
+    const user = await vault.authenticate(bearer(req));
+    if (!user) return json(res, 401, { error: 'Missing or invalid riOs key' });
+    const m = req.method, parts = path.split('/').filter(Boolean).slice(1); // after "v1"
+    try {
+      if (m === 'GET' && parts[0] === 'me') return json(res, 200, { name: user.name });
+      if (m === 'GET' && parts[0] === 'subscriptions') return json(res, 200, await vault.listSubscriptions(user));
+      if (m === 'GET' && parts[0] === 'activity') return json(res, 200, await vault.activity(user, url.searchParams.get('limit')));
+      if (m === 'POST' && parts[0] === 'subscriptions' && parts.length === 1) return json(res, 200, await vault.addSubscription(user, (await readJson(req)) || {}));
+      if (m === 'POST' && parts[0] === 'subscriptions' && parts[2] === 'quote') return json(res, 200, await vault.quoteFunding(user, parts[1], ((await readJson(req)) || {}).months));
+      if (m === 'POST' && parts[0] === 'subscriptions' && parts[2] === 'fund') return json(res, 200, await vault.startFunding(user, parts[1], ((await readJson(req)) || {}).months));
+      if (m === 'DELETE' && parts[0] === 'subscriptions' && parts[1]) return json(res, 200, await vault.removeSubscription(user, parts[1]));
+      if (m === 'POST' && parts[0] === 'deposits' && parts[2] === 'cancel') return json(res, 200, await vault.cancelDeposit(user, parts[1]));
+      if (m === 'POST' && parts[0] === 'deposits' && parts[2] === 'check') return json(res, 200, await vault.confirmFunding(parts[1], { userId: user.id }));
+      return json(res, 404, { error: 'Not found' });
+    } catch (e) {
+      if (e.user) return json(res, e.code === 'not_found' ? 404 : 400, { error: e.message });
+      console.error('[rios] api failed:', e);
+      return json(res, 502, { error: e.message || 'Request failed' });
+    }
+  }
 }
 
 function bearer(req) { const h = req.headers.authorization || ''; return h.startsWith('Bearer ') ? h.slice(7).trim() : null; }
@@ -127,20 +151,6 @@ code,pre{background:rgba(127,160,200,.15);border-radius:8px;padding:2px 6px;font
 input{font:inherit;padding:12px 14px;border-radius:10px;border:1px solid #9DB0C1;width:100%;box-sizing:border-box;background:transparent;color:inherit}button{font:inherit;font-weight:600;margin-top:12px;padding:12px 20px;border-radius:999px;border:0;background:var(--cobalt);color:#fff;cursor:pointer}
 .warn{border-left:3px solid var(--cobalt);padding-left:12px}</style></head><body><main><a class="brand" href="https://riospay.xyz">riOs</a><h1>${esc(title)}</h1>${body}</main></body></html>`;
 }
-function signupForm() {
-  return `<p>Create a riOs account and connect it to your AI assistant. This runs on PayPal's sandbox: no real money moves.</p>
-<form method="post"><label for="name">Your name</label><input id="name" name="name" maxlength="60" required placeholder="Favour"><button type="submit">Create my key</button></form>`;
-}
-function keyPage(config, user, key) {
-  const mcp = `${config.publicUrl}/mcp`;
-  return `<p class="big">Welcome, ${esc(user.name)}. Here's your riOs API key.</p><pre>${esc(key)}</pre>
-<p class="warn">Copy it now: riOs only stores a fingerprint of it and can't show it again. Treat it like a password.</p>
-<h2>Connect your AI</h2>
-<p><b>Claude Code</b></p><pre>claude mcp add --transport http rios ${esc(mcp)} --header "Authorization: Bearer ${esc(key)}"</pre>
-<p><b>Claude (custom connector) and other apps that only take a URL</b></p><pre>${esc(config.publicUrl)}/mcp/k/${esc(key)}</pre>
-<p><b>Cursor / other MCP clients</b>: server URL <code>${esc(mcp)}</code>, header <code>Authorization: Bearer ${esc(key)}</code></p>`;
-}
-
 function png(res, b64) {
   const buf = Buffer.from(b64, 'base64');
   res.statusCode = 200;
