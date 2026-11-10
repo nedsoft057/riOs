@@ -1,0 +1,15 @@
+{
+  "name": "rios",
+  "version": "0.1.0",
+  "description": "riOs: prepay your subscriptions for the months you can afford. An MCP server that lets your AI fund, track and plan subscriptions, with PayPal handling the money.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "stdio": "node stdio.js",
+    "create-user": "node scripts/create-user.js",
+    "renew": "node scripts/renew.js",
+    "test": "node --test test/*.test.js"
+  }
+}
