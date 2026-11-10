@@ -2,8 +2,19 @@
 // Works over Streamable HTTP (stateless JSON responses) and stdio.
 import { UserError } from './util.js';
 import { PayPalError } from './paypal.js';
+import { ICON_PNG_48 } from './icon.js';
 
-export const SERVER_INFO = { name: 'rios', title: 'riOs', version: '0.1.0' };
+const PUBLIC = (process.env.PUBLIC_URL || 'https://api.riospay.xyz').replace(/\/+$/, '');
+export const SERVER_INFO = {
+  name: 'rios', title: 'riOs', version: '0.1.0',
+  description: 'Prepay your subscriptions for the months you can afford.',
+  websiteUrl: 'https://riospay.xyz',
+  // Logo shown by MCP clients that support server icons (spec 2025-11-25).
+  icons: [
+    { src: `${PUBLIC}/icon.png`, mimeType: 'image/png', sizes: ['256x256'] },
+    { src: `data:image/png;base64,${ICON_PNG_48}`, mimeType: 'image/png', sizes: ['48x48'] },
+  ],
+};
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 
 const INSTRUCTIONS = `riOs lets people prepay their subscriptions for the months they can afford.
