@@ -9,6 +9,7 @@
 import { handleMessage, SERVER_INFO } from './mcp.js';
 import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
 import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage } from './web.js';
+import { docsPage } from './docs.js';
 
 const MAX_BODY = 1_000_000;
 
@@ -25,6 +26,7 @@ export function createHandler({ vault, config }) {
       if (path === '/favicon.ico' || path === '/favicon.png') return png(res, ICON_PNG_48);
       if (path === '/' && req.method === 'GET') return html(res, 200, homePage());
       if (path === '/app' && req.method === 'GET') return html(res, 200, consolePage(config.publicUrl));
+      if (path === '/docs' && req.method === 'GET') return html(res, 200, docsPage(config.publicUrl));
       if (path.startsWith('/v1/')) return api(req, res, path, url);
 
       if (path === '/mcp' || path.startsWith('/mcp/k/')) {

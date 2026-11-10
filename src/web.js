@@ -3,9 +3,9 @@
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const MARK = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#EAF6FF"/><g transform="translate(60 60) scale(.82) translate(-60 -62)"><g transform="translate(60 62)"><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#BFE3FB" transform="translate(-14 -10) rotate(-34) skewY(6)"/><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#98D5FD" transform="translate(-7 -5) rotate(-24) skewY(6)"/><g transform="skewY(-17)"><rect x="-30" y="-30" width="66" height="72" rx="14" fill="#111A24"/><path d="M-8 26 V4 Q-8 -8 4 -10 L18 -12" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g></g></g></svg>`;
+export const MARK = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#EAF6FF"/><g transform="translate(60 60) scale(.82) translate(-60 -62)"><g transform="translate(60 62)"><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#BFE3FB" transform="translate(-14 -10) rotate(-34) skewY(6)"/><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#98D5FD" transform="translate(-7 -5) rotate(-24) skewY(6)"/><g transform="skewY(-17)"><rect x="-30" y="-30" width="66" height="72" rx="14" fill="#111A24"/><path d="M-8 26 V4 Q-8 -8 4 -10 L18 -12" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g></g></g></svg>`;
 
-const CSS = `
+export const CSS = `
 :root{--ink:#070D14;--card:rgba(16,28,42,.62);--line:rgba(152,213,253,.14);--text:#EEF5FB;--muted:#93A6B8;--sky:#98D5FD;--cobalt:#2F7BFF;--ok:#7BE0B0;--warn:#FFC978;--bad:#FF8A8A;
   --display:"Inter Tight","Inter",ui-sans-serif,system-ui,sans-serif;--body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -65,7 +65,7 @@ export function shell(title, body, { wide = false, script = '' } = {}) {
 <style>${CSS}</style></head><body>
 <header class="top"><a class="brand" href="/">${MARK}riOs</a><span class="badge">Sandbox</span></header>
 <main class="${wide ? '' : 'wrap'} fade">${body}</main>
-<footer class="foot"><span>riOs · prepay your subscriptions, your AI handles the rest</span><span><a href="https://riospay.xyz">riospay.xyz</a></span></footer>
+<footer class="foot"><span>riOs · prepay your subscriptions, your AI handles the rest</span><span><a href="/docs">Docs</a> · <a href="https://riospay.xyz">riospay.xyz</a></span></footer>
 <script>
 document.addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if (!b) return;
   navigator.clipboard?.writeText(b.dataset.copy).then(() => { const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => b.textContent = t, 1400); }); });
