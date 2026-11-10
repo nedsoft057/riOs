@@ -7,6 +7,7 @@
 //   POST /cron/renew             daily renewals (Authorization: Bearer <CRON_SECRET>)
 //   GET  /health
 import { handleMessage, SERVER_INFO } from './mcp.js';
+import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
 
 const MAX_BODY = 1_000_000;
 
@@ -18,7 +19,9 @@ export function createHandler({ vault, config }) {
     url.searchParams.delete('__path');
     const path = raw.replace(/^\/api\/index(?=\/|$)/, '').replace(/^\/api(?=\/|$)/, '').replace(/\/+$/, '') || '/';
     try {
-      if (path === '/health') return json(res, 200, { ok: true, server: SERVER_INFO, paypal: config.paypal.env });
+      if (path === '/health') return json(res, 200, { ok: true, server: { name: SERVER_INFO.name, title: SERVER_INFO.title, version: SERVER_INFO.version }, paypal: config.paypal.env });
+      if (path === '/icon.png' || path === '/apple-touch-icon.png') return png(res, ICON_PNG_256);
+      if (path === '/favicon.ico' || path === '/favicon.png') return png(res, ICON_PNG_48);
       if (path === '/' && req.method === 'GET') return html(res, 200, page('riOs MCP server', `<p>This is the riOs MCP server. Connect your AI assistant to <code>${esc(config.publicUrl)}/mcp</code>.</p><p><a href="/signup">Get an API key</a></p>`));
 
       if (path === '/mcp' || path.startsWith('/mcp/k/')) {
@@ -116,7 +119,7 @@ function end(res, status) { res.statusCode = status; res.end(); }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 function page(title, body) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · riOs</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" href="/icon.png"><title>${esc(title)} · riOs</title>
 <style>:root{--ink:#0B121A;--muted:#4A5A6A;--sky:#98D5FD;--cobalt:#2F7BFF;--bg:#F2F7FB}@media (prefers-color-scheme:dark){:root{--ink:#EAF2F9;--muted:#9DB0C1;--bg:#0B121A;--cobalt:#6EB2FF}}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:620px;margin:0 auto;padding:48px 20px}
 h1{font-size:30px;margin:0 0 16px}.brand{font-weight:700;font-size:22px;margin-bottom:32px;display:block;color:var(--ink);text-decoration:none}p{color:var(--muted)}.big{font-size:21px;color:var(--ink)}
@@ -136,4 +139,13 @@ function keyPage(config, user, key) {
 <p><b>Claude Code</b></p><pre>claude mcp add --transport http rios ${esc(mcp)} --header "Authorization: Bearer ${esc(key)}"</pre>
 <p><b>Claude (custom connector) and other apps that only take a URL</b></p><pre>${esc(config.publicUrl)}/mcp/k/${esc(key)}</pre>
 <p><b>Cursor / other MCP clients</b>: server URL <code>${esc(mcp)}</code>, header <code>Authorization: Bearer ${esc(key)}</code></p>`;
+}
+
+function png(res, b64) {
+  const buf = Buffer.from(b64, 'base64');
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Length', buf.length);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.end(buf);
 }

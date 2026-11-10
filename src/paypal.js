@@ -56,6 +56,7 @@ export class PayPal {
       }],
       payment_source: { paypal: { experience_context: {
         brand_name: 'riOs', shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW',
+        landing_page: 'LOGIN', // open PayPal's login screen, not the guest card form
         return_url: returnUrl, cancel_url: cancelUrl,
       } } },
     }, requestId);
