@@ -21,11 +21,20 @@ const EX = {
 
 // tiny highlighter: json and shell
 function hl(code, lang) {
+  if (lang === 'json') {   // tokenize raw text so numbers inside strings stay strings
+    let out = '', last = 0;
+    const re = /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?)/g;
+    for (let m; (m = re.exec(code));) {
+      out += esc(code.slice(last, m.index));
+      if (m[1]) out += m[2] ? `<i class="k">${esc(m[1])}</i>${m[2]}` : `<i class="s">${esc(m[1])}</i>`;
+      else if (m[3]) out += `<i class="b">${m[3]}</i>`;
+      else out += `<i class="n">${m[4]}</i>`;
+      last = re.lastIndex;
+    }
+    return out + esc(code.slice(last));
+  }
   let s = esc(code);
-  if (lang === 'json') {
-    s = s.replace(/(&quot;(?:[^&]|&(?!quot;))*?&quot;)(\s*:)?/g, (m, str, colon) => colon ? `<i class="k">${str}</i>${colon}` : `<i class="s">${str}</i>`)
-      .replace(/\b(true|false|null)\b/g, '<i class="b">$1</i>').replace(/(?<![\w"#-])(-?\d+(?:\.\d+)?)(?![\w-])/g, '<i class="n">$1</i>');
-  } else if (lang === 'sh') {
+  if (lang === 'sh') {
     s = s.replace(/^(\$ )?(\w[\w-]*)/gm, (m, p, cmd) => `${p ? '<i class="c">$ </i>' : ''}<i class="f">${cmd}</i>`)
       .replace(/(&quot;[^\n]*?&quot;|&#39;[^\n]*?&#39;)/g, '<i class="s">$1</i>').replace(/( --?[\w-]+)/g, '<i class="b">$1</i>');
   }
