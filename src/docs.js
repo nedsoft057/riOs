@@ -160,7 +160,7 @@ npm start                          # http://localhost:8787/mcp`, 'sh', 'Run it y
 html{scroll-behavior:smooth;scroll-padding-top:90px}
 .top{position:sticky;top:0;z-index:20;max-width:none;background:rgba(7,13,20,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 .top .r{display:flex;gap:10px;align-items:center}.top .r a{font-size:14px;color:var(--muted);text-decoration:none}.top .r a.btn{color:#0B121A}
-body{overflow-x:hidden}.doc *{overflow-wrap:anywhere}.code pre,table{overflow-wrap:normal}
+body{overflow-x:hidden}.doc *{overflow-wrap:anywhere}.code pre,.doc table,.doc table *{overflow-wrap:normal;word-break:normal}
 .layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:0 24px}
 .side nav{position:sticky;top:84px;display:flex;flex-direction:column;gap:2px;padding:24px 0;max-height:calc(100svh - 90px);overflow:auto}
 .side a{padding:7px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500}
@@ -188,12 +188,14 @@ a code{color:var(--sky)}
 i.k{color:#98D5FD;font-style:normal}i.s{color:#B8E7A9;font-style:normal}i.n{color:#FFC978;font-style:normal}i.b{color:#C9A7FF;font-style:normal}i.f{color:#7FB8FF;font-style:normal}i.c{color:#5E7385;font-style:normal}
 table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
 th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.doc th,.doc td:not(:last-child){white-space:nowrap}.doc td:last-child{min-width:200px}
 .req{margin-left:8px;font:600 10px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
 ol.qs{counter-reset:q;list-style:none;display:grid;gap:12px;margin-top:10px}
 ol.qs li{counter-increment:q;position:relative;padding:16px 18px 16px 56px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:#C9D8E5}
 ol.qs li::before{content:counter(q);position:absolute;left:16px;top:15px;width:26px;height:26px;border-radius:50%;background:var(--cobalt);color:#fff;display:grid;place-items:center;font:700 13px var(--body)}
 ol.qs a{color:var(--sky)}
 .cpane{margin-top:6px}
+#ct{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}#ct::-webkit-scrollbar{display:none}#ct button{flex:none;white-space:nowrap;padding:9px 14px}
 .flow{display:grid;gap:0;margin:20px 0 8px;position:relative}
 .fs{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:0 0 22px;position:relative}
 .fs::before{content:"";position:absolute;left:21px;top:40px;bottom:0;width:2px;background:linear-gradient(var(--cobalt),rgba(47,123,255,.1))}.fs:last-child::before{display:none}
