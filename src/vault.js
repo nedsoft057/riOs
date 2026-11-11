@@ -109,7 +109,7 @@ export class Vault {
     });
   }
 
-  async startFunding(user, subscriptionId, months) {
+  async startFunding(user, subscriptionId, months, { card = null } = {}) {
     months = this.checkMonths(months);
     const owner = await this.merchantEmail();
     const dep = await this.store.transact(db => {
@@ -130,7 +130,11 @@ export class Vault {
     });
     let order;
     try {
-      order = await this.paypal.createOrder({
+      order = card ? await this.paypal.createCardOrder({
+        amountCents: dep.grossCents, currency: dep.currency, card,
+        description: `riOs: ${dep.subscriptionName}, ${dep.months} month${dep.months > 1 ? 's' : ''}`,
+        customId: dep.id, requestId: `order-${dep.id}`,
+      }) : await this.paypal.createOrder({
         amountCents: dep.grossCents, currency: dep.currency,
         description: `riOs: ${dep.subscriptionName}, ${dep.months} month${dep.months > 1 ? 's' : ''}`,
         customId: dep.id, requestId: `order-${dep.id}`,
@@ -277,22 +281,17 @@ export class Vault {
   }
 
   // ---------- renewals (run by the daily cron) ----------
-  async runRenewals() {
+  // userId limits the run to one account (used by the stress test); the daily cron runs everyone.
+  async runRenewals({ userId = null } = {}) {
     const report = { synced: 0, paid: 0, failed: 0, unfunded: 0, submitted: 0, errors: [] };
     // 1. Check payouts still in flight.
-    const inflight = await this.store.transact(db => db.payments.filter(p => ['pending', 'unclaimed'].includes(p.status) && p.batchId).map(p => ({ ...p })));
-    for (const p of inflight) {
-      try {
-        const st = await this.paypal.getPayout(p.batchId);
-        await this.store.transact(db => this.applyPayoutStatus(db, p.id, st, report));
-        report.synced++;
-      } catch (e) { report.errors.push(`sync ${p.id}: ${e.message}`); }
-    }
+    await this.syncPayouts({ userId }, report);
     // 2. Pay everything that's due.
     const t = today(this.now());
     const due = await this.store.transact(db => {
       const out = [];
       for (const sub of db.subscriptions) {
+        if (userId && sub.userId !== userId) continue;
         if (sub.status !== 'active' || sub.nextRenewal > t) continue;
         const period = sub.nextRenewal;
         if (db.payments.some(p => p.subscriptionId === sub.id && p.period === period && p.status !== 'failed')) continue;
@@ -328,6 +327,18 @@ export class Vault {
         await this.store.transact(db => this.failPayment(db, p.id, e.message, report));
         report.errors.push(`payout ${p.id}: ${e.message}`);
       }
+    }
+    return report;
+  }
+
+  async syncPayouts({ userId = null } = {}, report = { synced: 0, paid: 0, failed: 0, errors: [] }) {
+    const inflight = await this.store.transact(db => db.payments.filter(p => ['pending', 'unclaimed'].includes(p.status) && p.batchId && (!userId || p.userId === userId)).map(p => ({ ...p })));
+    for (const p of inflight) {
+      try {
+        const st = await this.paypal.getPayout(p.batchId);
+        await this.store.transact(db => this.applyPayoutStatus(db, p.id, st, report));
+        report.synced++;
+      } catch (e) { report.errors.push(`sync ${p.id}: ${e.message}`); }
     }
     return report;
   }

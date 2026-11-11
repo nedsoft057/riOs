@@ -37,6 +37,7 @@ export function loadConfig(env = process.env) {
     maxMonths: Number(env.RIOS_MAX_MONTHS || 24),
     maxMonthlyCents: Number(env.RIOS_MAX_MONTHLY_CENTS || 100000),
     cronSecret: env.CRON_SECRET || '',
+    stressKey: env.RIOS_STRESS_KEY || '',
     allowSignup: env.RIOS_ALLOW_SIGNUP !== 'no',
     store: {
       upstashUrl: env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL || '',

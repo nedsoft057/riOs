@@ -8,12 +8,14 @@
 //   GET  /health
 import { handleMessage, SERVER_INFO } from './mcp.js';
 import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
-import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage } from './web.js';
+import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage, proofPage } from './web.js';
+import { runStressStep, stressReport } from './stress.js';
+import { timingSafeEqual } from 'node:crypto';
 import { docsPage } from './docs.js';
 
 const MAX_BODY = 1_000_000;
 
-export function createHandler({ vault, config }) {
+export function createHandler({ vault, config, store, paypal }) {
   return async function handle(req, res) {
     const url = new URL(req.url, 'http://x');
     // On Vercel every route is rewritten to /api/index?__path=<original path>.
@@ -28,6 +30,14 @@ export function createHandler({ vault, config }) {
       if (path === '/app' && req.method === 'GET') return html(res, 200, consolePage(config.publicUrl));
       if (path === '/docs' && req.method === 'GET') return html(res, 200, docsPage(config.publicUrl));
       if (path.startsWith('/v1/')) return api(req, res, path, url);
+      if (path === '/proof' && req.method === 'GET') return html(res, 200, proofPage(await stressReport(store)));
+      if (path === '/proof.json' && req.method === 'GET') return json(res, 200, await stressReport(store));
+      if (path === '/admin/stress') {
+        const k = url.searchParams.get('key') || bearer(req) || '';
+        if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });
+        try { return json(res, 200, await runStressStep({ vault, store, paypal, config }, { payee: url.searchParams.get('payee') })); }
+        catch (e) { console.error('[rios] stress step failed:', e); return json(res, 502, { error: e.message, details: e.details || null }); }
+      }
 
       if (path === '/mcp' || path.startsWith('/mcp/k/')) {
         if (req.method === 'GET') { res.setHeader('Allow', 'POST'); return json(res, 405, { error: 'Use POST for MCP requests' }); }
@@ -116,6 +126,7 @@ export function createHandler({ vault, config }) {
   }
 }
 
+function safeEq(a, b) { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); }
 function bearer(req) { const h = req.headers.authorization || ''; return h.startsWith('Bearer ') ? h.slice(7).trim() : null; }
 function allowedOrigin(origin, config) {
   try { const o = new URL(origin); return o.hostname === 'localhost' || o.hostname === '127.0.0.1' || origin === new URL(config.publicUrl).origin || /(^|\.)claude\.ai$|(^|\.)anthropic\.com$|(^|\.)openai\.com$|(^|\.)chatgpt\.com$/.test(o.hostname); }

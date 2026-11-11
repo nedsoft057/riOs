@@ -12,6 +12,6 @@ export function getApp() {
   const store = createStore(config);
   const paypal = new PayPal(config.paypal);
   const vault = new Vault({ store, paypal, config });
-  cached = { config, store, paypal, vault, handler: createHandler({ vault, config }) };
+  cached = { config, store, paypal, vault, handler: createHandler({ vault, config, store, paypal }) };
   return cached;
 }

@@ -64,6 +64,17 @@ export class PayPal {
     return { id: order.id, status: order.status, approveUrl: link?.href };
   }
 
+  // Stress test only: a server-side order paid with a PayPal sandbox test card, no buyer login.
+  async createCardOrder({ amountCents, currency, description, customId, requestId, card }) {
+    const order = await this.call('POST', '/v2/checkout/orders', {
+      intent: 'CAPTURE',
+      purchase_units: [{ reference_id: customId, custom_id: customId, description: description.slice(0, 127), amount: { currency_code: currency, value: money(amountCents) } }],
+      payment_source: { card: { name: card.name, number: card.number, expiry: card.expiry, security_code: card.cvv,
+        billing_address: { address_line_1: '2211 N First Street', admin_area_2: 'San Jose', admin_area_1: 'CA', postal_code: '95131', country_code: 'US' } } },
+    }, requestId);
+    return { id: order.id, status: order.status, approveUrl: null };
+  }
+
   getOrder(orderId) { return this.call('GET', `/v2/checkout/orders/${encodeURIComponent(orderId)}`); }
 
   async captureOrder(orderId, requestId) {

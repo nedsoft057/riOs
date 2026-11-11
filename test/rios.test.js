@@ -288,3 +288,22 @@ test('an abandoned checkout can be cancelled, then the subscription removed', as
   const r = await vault.removeSubscription(user, sub.subscription_id);
   assert.equal(r.removed, true);
 });
+
+test('stress test: 50 transactions, only the stress account is touched', async () => {
+  const { config, vault } = setup({ PAYPAL_ENV: 'sandbox' });
+  const store = vault.store;
+  const { user: favour } = await vault.createUser('Favour');
+  const { sub: real } = await fundedSub(vault, favour, 3); // due 2026-11-15, must not be paid by the simulated clock
+  const { runStressStep, stressReport } = await import('../src/stress.js');
+  const deps = { vault, store, paypal: vault.paypal, config };
+  let r = await runStressStep(deps, { payee: 'provider@example.com' });
+  assert.equal(r.phase, 'fund');
+  for (let i = 0; i < 20 && r.phase !== 'done'; i++) r = await runStressStep(deps, {});
+  assert.equal(r.phase, 'done');
+  const rep = await stressReport(store);
+  assert.deepEqual([rep.counts.funding, rep.counts.refund, rep.counts.renewal, rep.counts.paid, rep.counts.total], [15, 5, 30, 30, 50]);
+  const [s] = await vault.listSubscriptions(favour);
+  assert.equal(s.subscription_id, real.subscription_id);
+  assert.equal(s.locked_balance, '32.97');
+  assert.equal(s.recent_payments.length, 0);
+});

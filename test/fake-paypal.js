@@ -16,7 +16,7 @@ export async function startFakePayPal() {
     if (p === '/v1/oauth2/token') return send(200, { access_token: 'tok', expires_in: 3600 });
     if (p === '/v2/checkout/orders' && req.method === 'POST') {
       const id = `ORDER${++state.n}`;
-      const o = { id, status: 'PAYER_ACTION_REQUIRED', amount: data.purchase_units[0].amount, links: [{ rel: 'payer-action', href: `https://sandbox.paypal.test/checkout?token=${id}` }] };
+      const o = { id, status: data.payment_source?.card ? 'APPROVED' : 'PAYER_ACTION_REQUIRED', amount: data.purchase_units[0].amount, links: [{ rel: 'payer-action', href: `https://sandbox.paypal.test/checkout?token=${id}` }] };
       state.orders[id] = o; return send(201, remember({ id, status: o.status, links: o.links }));
     }
     let m;
