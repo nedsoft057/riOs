@@ -307,3 +307,14 @@ test('stress test: 50 transactions, only the stress account is touched', async (
   assert.equal(s.locked_balance, '32.97');
   assert.equal(s.recent_payments.length, 0);
 });
+
+test('rotating a key keeps the account and kills the old key', async () => {
+  const { vault } = setup();
+  const { user, apiKey } = await vault.createUser('Favour');
+  await fundedSub(vault, user, 2);
+  const { apiKey: k2 } = await vault.rotateKey(user.id);
+  assert.equal(await vault.authenticate(apiKey), null);
+  const u2 = await vault.authenticate(k2);
+  assert.equal(u2.id, user.id);
+  assert.equal((await vault.listSubscriptions(u2)).length, 1);
+});
