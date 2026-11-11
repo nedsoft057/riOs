@@ -28,6 +28,17 @@ export class Vault {
     return { user: { id: user.id, name }, apiKey: key };
   }
 
+  // Issue a new key for an existing account; the old key stops working immediately.
+  async rotateKey(userId) {
+    const key = `rios_${randomBytes(24).toString('base64url')}`;
+    const ok = await this.store.transact(db => {
+      const u = db.users.find(x => x.id === userId); if (!u) return false;
+      u.keyHash = sha256(key); log(db, u.id, 'key_rotated', {}, this.now()); return true;
+    });
+    if (!ok) throw new UserError('Account not found', 'not_found');
+    return { apiKey: key };
+  }
+
   async authenticate(key) {
     if (!key || typeof key !== 'string') return null;
     const h = sha256(key);

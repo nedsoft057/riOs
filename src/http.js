@@ -32,6 +32,12 @@ export function createHandler({ vault, config, store, paypal }) {
       if (path.startsWith('/v1/')) return api(req, res, path, url);
       if (path === '/proof' && req.method === 'GET') return html(res, 200, proofPage(await stressReport(store)));
       if (path === '/proof.json' && req.method === 'GET') return json(res, 200, await stressReport(store));
+      if (path === '/admin/rekey') {
+        const k = url.searchParams.get('key') || '';
+        if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });
+        try { return json(res, 200, await vault.rotateKey(url.searchParams.get('user'))); }
+        catch (e) { return json(res, e.user ? 404 : 500, { error: e.message }); }
+      }
       if (path === '/admin/stress') {
         const k = url.searchParams.get('key') || bearer(req) || '';
         if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });
@@ -108,6 +114,7 @@ export function createHandler({ vault, config, store, paypal }) {
     if (!user) return json(res, 401, { error: 'Missing or invalid riOs key' });
     const m = req.method, parts = path.split('/').filter(Boolean).slice(1); // after "v1"
     try {
+      if (m === 'POST' && parts[0] === 'key' && parts[1] === 'rotate') return json(res, 200, await vault.rotateKey(user.id));
       if (m === 'GET' && parts[0] === 'me') return json(res, 200, { name: user.name });
       if (m === 'GET' && parts[0] === 'subscriptions') return json(res, 200, await vault.listSubscriptions(user));
       if (m === 'GET' && parts[0] === 'activity') return json(res, 200, await vault.activity(user, url.searchParams.get('limit')));
