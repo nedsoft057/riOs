@@ -51,8 +51,8 @@ input:focus,select:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(152,2
 .tabs button{flex:1;padding:9px 6px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted)}
 .tabs button.on{background:rgba(255,255,255,.92);color:#0B121A}
 ol.steps{list-style:none;counter-reset:s;display:grid;gap:14px;margin-top:6px}
-ol.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:8px;font-size:15px}
-ol.steps li::before{content:counter(s,decimal-leading-zero);font:700 12px var(--body);color:var(--sky);padding-top:3px}
+ol.steps li{counter-increment:s;position:relative;padding-left:36px;font-size:15px}
+ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:3px;font:700 12px var(--body);color:var(--sky)}
 .foot{max-width:1080px;margin:0 auto;padding:30px 20px 40px;color:#5E7385;font-size:13px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .fade{animation:fin .6s ease both}@keyframes fin{from{opacity:0;transform:translateY(12px)}}
 `;
