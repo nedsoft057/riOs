@@ -223,7 +223,7 @@ document.getElementById('ct').onclick = e => { const b = e.target.closest('butto
   document.querySelectorAll('#ct button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.cpane').forEach(p => p.hidden = p.dataset.c !== b.dataset.c); };
 const links = [...document.querySelectorAll('.side a[data-s]')];
-const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => { const on = a.dataset.s === en.target.id; a.classList.toggle('on', on); if (on && innerWidth < 900) a.scrollIntoView({ inline: 'center', block: 'nearest' }); }); }), { rootMargin: '-40% 0px -55% 0px' });
+const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => { const on = a.dataset.s === en.target.id; a.classList.toggle('on', on); if (on && innerWidth < 900) { const n = a.parentElement; n.scrollTo({ left: n.scrollLeft + a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2, behavior: 'smooth' }); } }); }), { rootMargin: '-40% 0px -55% 0px' });
 document.querySelectorAll('.doc > section').forEach(s => io.observe(s));
 </script></body></html>`;
 }
