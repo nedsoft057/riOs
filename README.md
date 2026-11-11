@@ -12,7 +12,11 @@ riOs is an [MCP](https://modelcontextprotocol.io) server. Connect it to Claude, 
 - lock that money for the subscription, and pay **every renewal on its due date** through PayPal Payouts
 - answer "how long am I covered?" and "I've got $50, what can I cover?"
 
-Website: [riospay.xyz](https://riospay.xyz)
+Website: [riospay.xyz](https://riospay.xyz) · Console: [api.riospay.xyz/app](https://api.riospay.xyz/app) · Docs: [api.riospay.xyz/docs](https://api.riospay.xyz/docs)
+
+## Stress tested: 50 real PayPal sandbox transactions
+
+We ran riOs end to end against the PayPal sandbox through the same code paths real users hit: **15 deposits locked** (Orders v2 capture), **5 refunds** inside the 3-day window (Payments v2 refund) and **30 of 30 renewals paid** (Payouts v1) across three months on a simulated clock. 0 failed, 0 lost. Every PayPal transaction ID is public at **[api.riospay.xyz/proof](https://api.riospay.xyz/proof)** ([JSON](https://api.riospay.xyz/proof.json)). The run lives in [`src/stress.js`](src/stress.js) and only ever touches its own test account.
 
 ## How the money moves
 
