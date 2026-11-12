@@ -4,7 +4,7 @@
 
 Most subscriptions make you choose between paying every month or paying for a whole year. People with irregular income (freelancers, creators, students, anyone paid in seasons rather than salaries) often can't commit to either, but they *can* say: "I just got paid, cover me for three months."
 
-riOs is an [MCP](https://modelcontextprotocol.io) server. Connect it to Claude, ChatGPT, Cursor or any MCP client, and your AI can:
+riOs is an [MCP](https://modelcontextprotocol.io) server. Connect it to Claude, ChatGPT or any MCP client, and your AI can:
 
 - add the subscriptions you pay for
 - tell you exactly how much it costs to cover any number of months
@@ -13,6 +13,25 @@ riOs is an [MCP](https://modelcontextprotocol.io) server. Connect it to Claude, 
 - answer "how long am I covered?" and "I've got $50, what can I cover?"
 
 Website: [riospay.xyz](https://riospay.xyz) · Console: [api.riospay.xyz/app](https://api.riospay.xyz/app) · Docs: [api.riospay.xyz/docs](https://api.riospay.xyz/docs)
+
+## How riOs uses PayPal and AI
+
+**PayPal (Developer platform, sandbox)**
+
+| PayPal API | What riOs does with it |
+|---|---|
+| Orders v2 | Funding a subscription creates an order for monthly price × months. The user approves it in PayPal checkout; riOs captures it and locks the money for that one subscription and payee. |
+| Payouts v1 | A daily job (08:00 UTC cron) pays each due renewal: exactly one month's amount, to that subscription's payee. A failed payout returns the money to the locked balance and pauses the subscription. |
+| Payments v2 (refunds) | Within 3 days of approval, a deposit can be cancelled and everything not yet paid out is refunded. |
+
+Every money-moving call sends a `PayPal-Request-Id`, so a retry can never charge or pay twice.
+
+**AI**
+
+- **Model Context Protocol (MCP):** riOs is an MCP server (JSON-RPC 2.0 over Streamable HTTP) exposing nine tools. Each tool carries read-only or destructive hints, so assistants ask the user before calling anything that moves money.
+- **Claude (Anthropic) and ChatGPT (OpenAI):** users add riOs as a custom connector and manage everything in plain language: add subscriptions, check coverage, split new income, and prepare payments. The AI can prepare a payment but never approve it; only the user can, inside PayPal.
+
+**Other tools:** Node.js (no framework), Vercel (hosting + cron), Upstash Redis (storage).
 
 ## Stress tested: 50 real PayPal sandbox transactions
 
