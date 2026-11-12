@@ -21,7 +21,7 @@ Website: [riospay.xyz](https://riospay.xyz) · Console: [api.riospay.xyz/app](ht
 | PayPal API | What riOs does with it |
 |---|---|
 | Orders v2 | Funding a subscription creates an order for monthly price × months. The user approves it in PayPal checkout; riOs captures it and locks the money for that one subscription and payee. |
-| Payouts v1 | A daily job (08:00 UTC cron) pays each due renewal: exactly one month's amount, to that subscription's payee. A failed payout returns the money to the locked balance and pauses the subscription. |
+| Payouts v1 | A daily job (07:00 UTC cron) pays each due renewal: exactly one month's amount, to that subscription's payee. A failed payout returns the money to the locked balance and pauses the subscription. |
 | Payments v2 (refunds) | Within 3 days of approval, a deposit can be cancelled and everything not yet paid out is refunded. |
 
 Every money-moving call sends a `PayPal-Request-Id`, so a retry can never charge or pay twice.
