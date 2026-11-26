@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>riOs · Your subscriptions, covered ahead</title>
+<meta name="description" content="Lock in the months you can afford today. riOs holds the money and pays each renewal on its due date, so a slow month never cuts you off. Run it from Claude, ChatGPT or any MCP app.">
+<meta property="og:title" content="riOs · Your subscriptions, covered ahead">
+<meta property="og:description" content="Prepay your subscriptions for the months you can afford. riOs pays every renewal on time through PayPal.">
+<meta property="og:image" content="https://riospay.xyz/og.jpg">
+<meta property="og:url" content="https://riospay.xyz">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@riOspayHQ">
+<meta name="theme-color" content="#060A16">
+<link rel="icon" type="image/png" href="/logo-48.png">
+<link rel="apple-touch-icon" href="/logo-256.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#060A16; --bg-2:#0A1024; --panel:#0D1530; --panel-2:#111B3B;
+  --line:rgba(175,194,255,.12); --line-2:rgba(175,194,255,.2);
+  --text:#F2F5FF; --soft:#C6D0EE; --muted:#8C98BC;
+  --peri:#AFC2FF; --sky:#98D5FD; --ice:#D5EEFD; --blue:#3552D8; --blue-2:#4E6BFF;
+  --ok:#6FE3B4;
+  --display:"Inter Tight","Inter",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.035em;line-height:1.04;text-wrap:balance}
+.grad{background:linear-gradient(92deg,var(--ice) 0%,var(--peri) 50%,#8199FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* nav */
+nav{position:fixed;inset:0 0 auto;z-index:40;padding-top:env(safe-area-inset-top);transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+nav.solid{background:rgba(6,10,22,.72);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-color:var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;font:600 20px var(--display);letter-spacing:-.02em}
+.brand img{width:32px;height:32px;border-radius:9px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.nl{display:flex;gap:30px;font-size:15px;color:var(--soft)}
+.nl a{transition:color .2s}.nl a:hover{color:#fff}
+.nr{display:flex;align-items:center;gap:18px}
+.signin{font-size:15px;color:var(--soft)}.signin:hover{color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;font-weight:600;font-size:15px;transition:transform .2s,background .2s,box-shadow .2s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:#fff;color:#08102A;box-shadow:0 8px 30px -10px rgba(175,194,255,.6)}
+.btn.pri:hover{background:var(--ice)}
+.btn.sec{border:1px solid var(--line-2);color:#fff;background:rgba(255,255,255,.03)}
+.btn.sec:hover{background:rgba(255,255,255,.08)}
+.btn.sm{height:38px;padding:0 16px;font-size:14px}
+@media (max-width:860px){.nl,.signin{display:none}}
+
+/* hero */
+.hero{position:relative;padding:150px 0 40px;text-align:center;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;
+  background:radial-gradient(60% 50% at 50% 0%,rgba(78,107,255,.32),transparent 70%),radial-gradient(40% 40% at 85% 30%,rgba(152,213,253,.10),transparent 70%)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.55;
+  background:repeating-linear-gradient(180deg,rgba(175,194,255,.09) 0 1px,transparent 1px 7px);
+  -webkit-mask:radial-gradient(70% 60% at 50% 30%,#000 0%,transparent 75%);mask:radial-gradient(70% 60% at 50% 30%,#000 0%,transparent 75%)}
+.pill{display:inline-flex;align-items:center;gap:10px;height:34px;padding:0 14px 0 6px;border-radius:999px;border:1px solid var(--line-2);background:rgba(13,21,48,.6);font-size:13.5px;color:var(--soft)}
+.pl-s{display:none}@media (max-width:600px){.pl-l{display:none}.pl-s{display:inline}}
+.pill .dot{display:grid;place-items:center;height:22px;padding:0 9px;border-radius:999px;background:rgba(111,227,180,.12);color:var(--ok);font-weight:600;font-size:12px;gap:6px;grid-auto-flow:column}
+.pill .dot i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.hero h1{margin:26px auto 0;font-size:clamp(44px,7.2vw,92px)}
+.hero .sub{margin:22px auto 0;max-width:600px;color:var(--soft);font-size:clamp(17px,1.9vw,20px)}
+.hero .ctas{display:flex;justify-content:center;gap:12px;margin-top:34px;flex-wrap:wrap}
+.works{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:30px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+.ai{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px 0 6px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--soft);font-size:14px;font-weight:500;transition:background .2s,border-color .2s}
+.ai:hover{background:rgba(255,255,255,.08);border-color:var(--line-2)}
+.ai img{width:22px;height:22px;border-radius:6px}
+.ai.more{padding:0 13px}
+
+/* product demo */
+.demo{position:relative;margin:64px auto 0;max-width:1000px;text-align:left}
+.demo::before{content:"";position:absolute;left:10%;right:10%;bottom:-40px;height:160px;z-index:-1;background:radial-gradient(50% 50% at 50% 50%,rgba(78,107,255,.45),transparent 70%);filter:blur(30px)}
+.frame{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);border-radius:26px;overflow:hidden;border:1px solid var(--line-2);
+  background:linear-gradient(180deg,rgba(17,27,59,.92),rgba(10,16,36,.96));box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 50px 120px -40px rgba(0,0,0,.8)}
+.chat{min-width:0;padding:22px;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:400px}
+.chd{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.chd .who{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}
+.chd .who img{width:26px;height:26px;border-radius:7px}
+.tool{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--peri);padding:5px 10px 5px 5px;border-radius:999px;background:rgba(175,194,255,.08);border:1px solid var(--line)}
+.tool img{width:18px;height:18px;border-radius:5px}
+.msgs{display:flex;flex-direction:column;gap:14px;padding-top:20px;flex:1}
+.m{max-width:88%;padding:12px 15px;border-radius:18px;font-size:15px;line-height:1.5;opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.m.me{align-self:flex-end;background:#2A3C8E;border-bottom-right-radius:6px;color:#fff}
+.m.bot{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--line);border-bottom-left-radius:6px;color:var(--soft)}
+.m.bot b{color:#fff;font-weight:600}
+.quote{margin-top:10px;border-radius:14px;background:rgba(6,10,22,.6);border:1px solid var(--line);overflow:hidden}
+.quote .r{display:flex;justify-content:space-between;padding:9px 12px;font-size:13.5px;color:var(--muted)}
+.quote .r+.r{border-top:1px solid var(--line)}
+.quote .r b{color:#fff}
+.pp{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border-radius:12px;background:#FFC439;color:#0B1A3A;font-weight:700;font-size:14px;transition:background .3s,color .3s}
+.pp.done{background:rgba(111,227,180,.14);color:var(--ok)}
+.typing{display:inline-flex;gap:4px;padding:14px 16px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.show{opacity:1!important;transform:none!important}
+
+.cover{min-width:0;padding:22px;display:flex;flex-direction:column;gap:16px}
+.ck{font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sub-card{border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:18px}
+.sc-top{display:flex;align-items:center;gap:12px}
+.sc-top img{width:40px;height:40px;border-radius:11px;background:#fff;padding:7px}
+.sc-top b{display:block;font:600 17px var(--display);letter-spacing:-.01em}
+.sc-top small{color:var(--muted);font-size:13px}
+.status{margin-left:auto;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line);transition:all .4s}
+.status.on{background:rgba(111,227,180,.12);color:var(--ok);border-color:rgba(111,227,180,.25)}
+.big-n{margin-top:18px;display:flex;align-items:baseline;gap:8px}
+.big-n b{font:600 40px var(--display);letter-spacing:-.04em}
+.big-n span{color:var(--muted);font-size:14px}
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.mo{border-radius:12px;padding:10px;border:1px solid var(--line);background:rgba(6,10,22,.4);transition:all .45s}
+.mo span{display:block;font-size:12px;color:var(--muted)}
+.mo b{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--muted);margin-top:2px}
+.mo b svg{width:14px;height:14px;opacity:0;transition:opacity .3s}
+.mo.on{background:rgba(78,107,255,.16);border-color:rgba(175,194,255,.35)}
+.mo.on b{color:#fff}.mo.on b svg{opacity:1}
+.lockrow{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:var(--muted);padding:12px 2px 0;border-top:1px solid var(--line)}
+.lockrow b{color:#fff;font-weight:600}
+@media (max-width:820px){
+  .frame{grid-template-columns:minmax(0,1fr)}.chat{border-right:0;border-bottom:1px solid var(--line);min-height:0}
+  .demo{margin-top:48px}
+}
+
+/* sections */
+.block{padding:130px 0 0}
+.head{text-align:center;max-width:760px;margin:0 auto}
+.eyebrow{display:inline-block;font:600 13px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--peri)}
+.head h2{margin-top:16px;font-size:clamp(34px,5.4vw,62px)}
+.head p{margin:20px auto 0;color:var(--soft);font-size:clamp(17px,1.8vw,19px);max-width:620px}
+
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:60px}
+.c{position:relative;border-radius:24px;padding:30px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(17,27,59,.7),rgba(10,16,36,.7));overflow:hidden}
+.c::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(80% 60% at 0% 0%,rgba(175,194,255,.08),transparent 60%)}
+.c .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(78,107,255,.16);border:1px solid rgba(175,194,255,.2)}
+.c .ic svg{width:22px;height:22px;stroke:var(--peri);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.c h3{margin-top:22px;font-size:23px;letter-spacing:-.02em}
+.c p{margin-top:10px;color:var(--muted);font-size:16px}
+
+.steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:60px}
+.st{border-radius:24px;padding:26px;border:1px solid var(--line);background:rgba(13,21,48,.55);display:flex;flex-direction:column;gap:12px;min-height:260px}
+.st .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--display);background:#fff;color:#08102A}
+.st h3{font-size:22px;letter-spacing:-.02em;margin-top:6px}
+.st p{color:var(--muted);font-size:15.5px}
+.st .eg{margin-top:auto;padding:10px 12px;border-radius:12px;background:rgba(6,10,22,.6);border:1px solid var(--line);font-size:13.5px;color:var(--soft)}
+
+.trust{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:60px}
+.trust .c{padding:34px}
+.trust .c.wide{grid-column:span 2;display:flex;align-items:center;gap:28px}
+.trust .c.wide .ic{flex:none;width:58px;height:58px}
+.trust .c.wide h3{margin-top:0}
+
+.proof{margin-top:60px;border-radius:30px;border:1px solid var(--line-2);overflow:hidden;
+  background:radial-gradient(60% 100% at 50% 0%,rgba(78,107,255,.3),transparent 70%),var(--bg-2)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr)}
+.stats div{padding:40px 24px;text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font:600 clamp(40px,5vw,60px)/1 var(--display);letter-spacing:-.04em}
+.stats span{display:block;margin-top:10px;color:var(--muted);font-size:14.5px}
+.proof .ft{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:22px;border-top:1px solid var(--line);color:var(--soft);font-size:15px}
+@media (max-width:820px){.stats{grid-template-columns:1fr 1fr}.stats div:nth-child(3){border-left:0}.stats div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+.video{margin:56px auto 0;max-width:1000px;border-radius:26px;overflow:hidden;border:1px solid var(--line-2);aspect-ratio:16/9;background:var(--panel);position:relative;box-shadow:0 50px 120px -50px rgba(0,0,0,.9)}
+.video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+.faq{max-width:820px;margin:56px auto 0}
+.faq details{border-bottom:1px solid var(--line)}
+.faq details:first-child{border-top:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 4px;font:500 clamp(17px,1.6vw,19px)/1.4 var(--display);letter-spacing:-.01em}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary i{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);position:relative;transition:background .3s}
+.faq summary i::before,.faq summary i::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:1.6px;background:var(--peri);transform:translate(-50%,-50%)}
+.faq summary i::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .3s}
+.faq details[open] summary i{background:rgba(175,194,255,.1)}
+.faq details[open] summary i::after{transform:translate(-50%,-50%)}
+.faq .a{padding:0 4px 26px;color:var(--soft);font-size:16.5px;line-height:1.7;max-width:66ch}
+.faq .a b{color:#fff;font-weight:600}.faq .a a{color:var(--peri);text-decoration:underline;text-underline-offset:3px}
+
+.final{margin:130px 0 0;text-align:center;border-radius:34px;padding:clamp(56px,9vw,110px) 24px;position:relative;overflow:hidden;border:1px solid var(--line-2);
+  background:radial-gradient(70% 90% at 50% 100%,rgba(78,107,255,.45),transparent 70%),var(--bg-2)}
+.final::after{content:"";position:absolute;inset:0;opacity:.6;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(175,194,255,.08) 0 1px,transparent 1px 7px);
+  -webkit-mask:radial-gradient(60% 70% at 50% 100%,#000,transparent 75%);mask:radial-gradient(60% 70% at 50% 100%,#000,transparent 75%)}
+.final img{width:64px;height:64px;border-radius:18px;margin:0 auto;box-shadow:0 20px 50px -10px rgba(78,107,255,.6)}
+.final h2{margin-top:26px;font-size:clamp(36px,6vw,68px)}
+.final p{margin:18px auto 0;color:var(--soft);max-width:520px}
+.final .ctas{display:flex;justify-content:center;gap:12px;margin-top:32px;flex-wrap:wrap;position:relative;z-index:1}
+
+footer{margin-top:90px;border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area-inset-bottom))}
+.fg{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px}
+.fg p{color:var(--muted);font-size:15px;margin-top:14px;max-width:300px}
+.fg h4{font:600 13px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fg ul{list-style:none;margin-top:16px;display:grid;gap:10px;font-size:15px;color:var(--soft)}
+.fg a:hover{color:#fff}
+.legal{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:50px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+
+@media (max-width:900px){
+  .cards3,.steps{grid-template-columns:1fr 1fr}
+  .trust{grid-template-columns:1fr}.trust .c.wide{grid-column:auto;flex-direction:column;align-items:flex-start}
+  .fg{grid-template-columns:1fr 1fr}.fg>div:first-child{grid-column:span 2}
+  .block{padding-top:100px}
+}
+@media (max-width:600px){
+  .cards3,.steps{grid-template-columns:1fr}.st{min-height:0}
+  .hero{padding-top:124px}.hero h1{font-size:42px}.chat,.cover{padding:18px}.mo{padding:9px 8px}.mo b{font-size:13px}.lockrow{font-size:13px}
+  .hero .ctas .btn{flex:1 1 100%;height:50px}
+  .c{padding:26px}
+}
+
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+
+/* connect sheet */
+#sheet{position:fixed;inset:0;z-index:60;display:grid;place-items:end center;pointer-events:none;visibility:hidden;transition:visibility 0s .5s}
+#sheet .bd{position:absolute;inset:0;background:rgba(3,6,14,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .35s}
+#sheet .card{position:relative;width:min(560px,100%);max-height:88svh;overflow:auto;background:#0E1631;border:1px solid var(--line-2);border-bottom:0;border-radius:28px 28px 0 0;padding:22px 24px calc(30px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 -30px 80px rgba(0,0,0,.5)}
+@media (min-width:700px){#sheet{place-items:center}#sheet .card{border-radius:28px;border-bottom:1px solid var(--line-2);padding-bottom:30px;transform:translateY(30px) scale(.97);opacity:0;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .35s}}
+#sheet.open{pointer-events:auto;visibility:visible;transition:none}#sheet.open .bd{opacity:1}#sheet.open .card{transform:none;opacity:1}
+.sh-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.sh-tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);padding:4px;border-radius:999px}
+.sh-tabs button{padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted)}
+.sh-tabs button.on{background:#fff;color:#08102A}
+.close{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.06);font-size:14px;font-weight:600}
+.sh h3{font-size:28px}
+.sh .s{color:var(--muted);font-size:15px;margin:6px 0 20px}
+.sh ol{list-style:none;display:grid;gap:16px;counter-reset:s}
+.sh li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;font-size:15px;line-height:1.55;color:var(--soft)}
+.sh li b{color:#fff}
+.sh li::before{content:counter(s,decimal-leading-zero);font:600 13px var(--body);color:var(--peri);padding-top:2px}
+.url{display:flex;align-items:center;gap:8px;margin-top:10px;padding:12px 14px;border-radius:14px;background:rgba(6,10,22,.7);border:1px solid var(--line);font:500 13px ui-monospace,Menlo,monospace;color:var(--soft);word-break:break-all}
+.url button{margin-left:auto;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.08);font:600 12px var(--body);flex:none}
+.sh .go{display:inline-flex;margin-top:10px;padding:10px 16px;border-radius:999px;background:#fff;color:#08102A;font-weight:600;font-size:14px}
+.sh .note{margin-top:22px;padding:14px 16px;border-radius:14px;background:rgba(78,107,255,.12);border:1px solid var(--line);color:var(--soft);font-size:14px}
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="wrap">
+  <a class="brand" href="#"><img src="logo-256.jpg" alt="riOs logo" width="32" height="32">riOs</a>
+  <div class="nl"><a href="#why">Why riOs</a><a href="#how">How it works</a><a href="#security">Security</a><a href="#faq">FAQ</a><a href="https://api.riospay.xyz/docs">Docs</a></div>
+  <div class="nr"><a class="signin" href="https://api.riospay.xyz/app">Sign in</a><a class="btn pri sm" href="https://api.riospay.xyz/signup">Get started</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="pill"><span class="dot"><i></i>New</span><span class="pl-l">Pay ahead from Claude, ChatGPT or any MCP app</span><span class="pl-s">Pay ahead from the AI you use</span></div>
+  <h1>Your subscriptions,<br><span class="grad">covered ahead.</span></h1>
+  <p class="sub">Lock in the months you can afford today. riOs holds the money and pays each renewal on its due date, so a slow month never cuts you off.</p>
+  <div class="ctas">
+    <a class="btn pri" href="https://api.riospay.xyz/signup">Get started free</a>
+    <button class="btn sec" data-ai="claude">Connect your AI</button>
+  </div>
+
+  <div class="demo rv" id="demo-ui" aria-label="Example: asking an AI to cover Figma for three months">
+    <div class="frame">
+      <div class="chat">
+        <div class="chd"><span class="who"><img src="ai/claude.png" alt="">Claude</span><span class="tool"><img src="logo-48.png" alt="">riOs connected</span></div>
+        <div class="msgs">
+          <div class="m me" id="m1">Cover my Figma plan for the next 3 months.</div>
+          <div class="m bot" id="m0"><span class="typing"><i></i><i></i><i></i></span></div>
+          <div class="m bot" id="m2">Here's the quote from riOs. <b>Approve it in PayPal</b> and you're covered.
+            <div class="quote">
+              <div class="r"><span>Figma Professional</span><b>$15 / month</b></div>
+              <div class="r"><span>3 renewals · no fee</span><b>$45.00</b></div>
+            </div>
+            <div class="pp" id="pp">Approve with PayPal</div>
+          </div>
+        </div>
+      </div>
+      <div class="cover">
+        <span class="ck">Coverage</span>
+        <div class="sub-card">
+          <div class="sc-top"><img src="ai/figma.png" alt=""><div><b>Figma</b><small>Renews on the 26th</small></div><span class="status" id="stat">Not covered</span></div>
+          <div class="big-n"><b id="lockamt">$0</b><span>locked for renewals</span></div>
+          <div class="months">
+            <div class="mo" id="mo1"><span>Dec 26</span><b><svg viewBox="0 0 24 24" fill="none" stroke="#6FE3B4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Covered</b></div>
+            <div class="mo" id="mo2"><span>Jan 26</span><b><svg viewBox="0 0 24 24" fill="none" stroke="#6FE3B4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Covered</b></div>
+            <div class="mo" id="mo3"><span>Feb 26</span><b><svg viewBox="0 0 24 24" fill="none" stroke="#6FE3B4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Covered</b></div>
+          </div>
+        </div>
+        <div class="lockrow"><span>Covered through</span><b id="thru">Not yet</b></div>
+        <div class="lockrow"><span>Paid out by</span><b>PayPal, on each due date</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="works"><span>Works with</span>
+    <button class="ai" data-ai="claude"><img src="ai/claude.png" alt="">Claude</button>
+    <button class="ai" data-ai="chatgpt"><img src="ai/chatgpt.png" alt="" style="background:#fff;padding:2px">ChatGPT</button>
+    <button class="ai" data-ai="cursor"><img src="ai/cursor.png" alt="">Cursor</button>
+    <button class="ai more" data-ai="cursor">Any MCP app</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+<section class="block" id="why">
+  <div class="head rv"><span class="eyebrow">Why riOs</span><h2>Income comes in waves. <span class="grad">Your bills don't.</span></h2>
+    <p>Freelancers, creators and builders get paid in bursts. Subscriptions charge on the same day every month. riOs closes that gap by letting you pay forward the moment money lands.</p></div>
+  <div class="cards3">
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>Pay in the good months</h3><p>Big payout this month? Cover the next three months of your tools in one go, while the money is still there.</p></div>
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div><h3>Ride out the slow ones</h3><p>When nothing comes in, your renewals still go through. No failed payments, no lost access, no stress.</p></div>
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div><h3>Keep work money separate</h3><p>Set money aside for your business tools so it never gets spent on anything else by accident.</p></div>
+  </div>
+</section>
+
+<section class="block" id="how">
+  <div class="head rv"><span class="eyebrow">How it works</span><h2>Set up in one message.</h2>
+    <p>No new app to learn. Connect riOs to the AI you already use and talk to it like you would a friend who handles your bills.</p></div>
+  <div class="steps">
+    <div class="st rv"><span class="n">1</span><h3>Ask</h3><p>Tell your AI which subscription to cover and for how long.</p><div class="eg">"Cover Spotify for 6 months"</div></div>
+    <div class="st rv"><span class="n">2</span><h3>Review</h3><p>riOs works out the exact total and your AI shows you the quote before anything moves.</p><div class="eg">$10.99 × 6 = $65.94</div></div>
+    <div class="st rv"><span class="n">3</span><h3>Approve</h3><p>You approve once inside PayPal. Your AI never sees your login or your card.</p><div class="eg">PayPal checkout</div></div>
+    <div class="st rv"><span class="n">4</span><h3>Relax</h3><p>riOs locks the money and pays each renewal on its due date, month after month.</p><div class="eg">Covered until May 2027</div></div>
+  </div>
+</section>
+
+<section class="block" id="security">
+  <div class="head rv"><span class="eyebrow">Security</span><h2>Your AI prepares. <span class="grad">Only you approve.</span></h2>
+    <p>riOs is built so that money set aside for a subscription can only ever reach that subscription.</p></div>
+  <div class="trust">
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><h3>Locked to one payee</h3><p>Funds for a subscription can only pay that subscription, one month at a time. Nobody can redirect them, not even a tricked AI.</p></div>
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>You press pay, always</h3><p>Every deposit is approved by you inside PayPal. Your AI can line it up, but it can never pay on its own.</p></div>
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div><h3>3 days to change your mind</h3><p>Cancel within 3 days of a deposit and get back everything that hasn't been paid out. After that it stays locked for your renewals.</p></div>
+    <div class="c rv"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg></div><h3>No card details, ever</h3><p>You pay through PayPal's own checkout. riOs never asks for, sees or stores your card number or password.</p></div>
+  </div>
+</section>
+
+<section class="block" id="proof">
+  <div class="head rv"><span class="eyebrow">Proof</span><h2>50 transactions. <span class="grad">Zero lost.</span></h2>
+    <p>We ran riOs through PayPal's sandbox end to end: deposits, refunds inside the 3-day window and three months of renewals. Every transaction ID is public.</p></div>
+  <div class="proof rv">
+    <div class="stats">
+      <div><b>15</b><span>deposits locked</span></div>
+      <div><b>5</b><span>refunds in the window</span></div>
+      <div><b>30/30</b><span>renewals paid on time</span></div>
+      <div><b>0</b><span>failed or lost</span></div>
+    </div>
+    <div class="ft">Every payment, traceable. <a class="btn sec sm" href="https://api.riospay.xyz/proof">See all transactions</a></div>
+  </div>
+</section>
+
+<section class="block" id="demo">
+  <div class="head rv"><span class="eyebrow">Demo</span><h2>See it work, live.</h2>
+    <p>One message to Claude. One PayPal approval. Three months covered.</p></div>
+  <div class="video rv" id="vid"></div>
+</section>
+
+<section class="block" id="faq">
+  <div class="head rv"><span class="eyebrow">FAQ</span><h2>Questions, answered.</h2></div>
+  <div class="faq rv">
+    <details><summary>What exactly does riOs do?<i></i></summary><div class="a">riOs lets you pay for your subscriptions months in advance. You choose a subscription and how many months to cover, approve the total once in PayPal, and riOs pays each renewal on its due date until the money runs out.</div></details>
+    <details><summary>Does riOs store my card details?<i></i></summary><div class="a"><b>No.</b> You pay inside PayPal's own checkout, and riOs only receives PayPal's confirmation that the payment went through. It never asks for, receives or stores card numbers or your PayPal password.</div></details>
+    <details><summary>Can my AI spend my money on its own?<i></i></summary><div class="a"><b>No.</b> Your AI can prepare a payment, but only you can approve it, inside PayPal. Once money is locked, its payee and monthly amount can't change, so even a confused or tricked AI can't send it anywhere else.</div></details>
+    <details><summary>Can I get my money back?<i></i></summary><div class="a">Yes. Within <b>3 days</b> of approving a deposit you can cancel it and get back everything not yet paid out. After that, the money stays locked for your provider. That's the point: it's there when the renewal comes.</div></details>
+    <details><summary>What if a renewal payment fails?<i></i></summary><div class="a">Nothing is lost. If PayPal rejects a payout, the money goes straight back to your locked balance and that subscription is paused until you sort it out.</div></details>
+    <details><summary>What data does riOs keep?<i></i></summary><div class="a">Only what it needs to pay your renewals: each subscription's name, price, payee and schedule, plus a ledger of PayPal transaction IDs. Your API key isn't stored at all, only a secure fingerprint of it. You can rotate your key any time from the console.</div></details>
+    <details><summary>Is this real money yet?<i></i></summary><div class="a">Not yet. riOs currently runs on <b>PayPal's sandbox</b>, so every transaction is a test transaction. Live payments are next.</div></details>
+    <details><summary>Which AI assistants work with riOs?<i></i></summary><div class="a">Claude, ChatGPT, Cursor and any app that supports MCP, the open standard for connecting AI to real tools. Setup takes about a minute. See the <a href="https://api.riospay.xyz/docs">docs</a>.</div></details>
+    <details><summary>Does riOs charge a fee?<i></i></summary><div class="a">No. riOs is free while it's in beta.</div></details>
+  </div>
+</section>
+
+<section class="final rv">
+  <img src="logo-256.jpg" alt="">
+  <h2>Cover next month, <span class="grad">today.</span></h2>
+  <p>Get your key, connect your AI and lock in your first subscription in under two minutes.</p>
+  <div class="ctas"><a class="btn pri" href="https://api.riospay.xyz/signup">Get started free</a><button class="btn sec" data-ai="claude">Connect your AI</button></div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="fg">
+    <div><a class="brand" href="#"><img src="logo-256.jpg" alt="" width="32" height="32">riOs</a><p>Prepay your subscriptions for the months you can afford. Renewals paid on time through PayPal.</p></div>
+    <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="#security">Security</a></li><li><a href="https://api.riospay.xyz/docs">Docs</a></li><li><a href="https://api.riospay.xyz/app">Console</a></li></ul></div>
+    <div><h4>Company</h4><ul><li><a href="https://x.com/riOspayHQ">X (Twitter)</a></li><li><a href="https://www.youtube.com/@riospayxyz">YouTube</a></li><li><a href="https://github.com/nedsoft057/rios">GitHub</a></li><li><a href="mailto:favourndukwu2@gmail.com">Contact</a></li></ul></div>
+  </div>
+  <div class="legal"><span>© 2026 Riospay Integrated Services</span><span>Payments processed by PayPal</span></div>
+</div></footer>
+
+<div id="sheet"><div class="bd"></div><div class="card sh">
+  <div class="sh-top"><div class="sh-tabs"><button data-ai="claude">Claude</button><button data-ai="chatgpt">ChatGPT</button><button data-ai="cursor">Cursor</button></div><button class="close">Close</button></div>
+  <div id="shbody"></div>
+</div></div>
+
+<script>
+// nav
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('solid', scrollY > 20);
+addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+// product demo loop
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setState(s) {
+  $('m1').classList.toggle('show', s >= 1);
+  $('m0').classList.toggle('show', s === 2);
+  $('m0').style.display = s === 2 ? '' : 'none';
+  $('m2').classList.toggle('show', s >= 3);
+  const pp = $('pp'); pp.classList.toggle('done', s >= 4); pp.textContent = s >= 4 ? 'Approved in PayPal ✓' : 'Approve with PayPal';
+  ['mo1', 'mo2', 'mo3'].forEach((id, i) => $(id).classList.toggle('on', s >= 5 + i));
+  const st = $('stat'); st.classList.toggle('on', s >= 5); st.textContent = s >= 5 ? 'Covered' : 'Not covered';
+  $('lockamt').textContent = s >= 5 ? '$45' : '$0';
+  $('thru').textContent = s >= 7 ? 'Feb 26, 2027' : s >= 6 ? 'Jan 26, 2027' : s >= 5 ? 'Dec 26, 2026' : 'Not yet';
+}
+if (reduce) setState(7);
+else {
+  const seq = [[0, 600], [1, 900], [2, 1300], [3, 1700], [4, 900], [5, 450], [6, 450], [7, 4200]];
+  let i = 0, running = false, timer;
+  const step = () => { const [s, d] = seq[i]; setState(s); i = (i + 1) % seq.length; timer = setTimeout(step, d); };
+  new IntersectionObserver(es => {
+    if (es[0].isIntersecting && !running) { running = true; step(); }
+    else if (!es[0].isIntersecting && running) { running = false; clearTimeout(timer); }
+  }).observe($('demo-ui'));
+  setState(0);
+}
+
+// connect sheet
+const LINK = 'https://api.riospay.xyz/mcp/k/&lt;your-key&gt;';
+const GUIDES = {
+  claude: { t: 'Connect riOs to Claude', s: 'Works on claude.ai, the desktop app and mobile.', steps: [
+    `Get your riOs key. Your connector link appears on the next page.<br><a class="go" href="https://api.riospay.xyz/signup">Get your key</a>`,
+    `It looks like this:<div class="url"><span>${LINK}</span></div>`,
+    `In Claude, open <b>Settings, then Connectors</b> and tap <b>Add custom connector</b>.`,
+    `Name it <b>riOs</b>, paste your link and choose <b>No sign-in</b>. Your key is already inside the link.`,
+    `Start a chat, turn on riOs from the tools menu and say: <i>"cover my design tool for 3 months"</i>.`] },
+  chatgpt: { t: 'Connect riOs to ChatGPT', s: 'Custom connectors need developer mode on ChatGPT web.', steps: [
+    `Get your riOs key and copy your connector link.<br><a class="go" href="https://api.riospay.xyz/signup">Get your key</a>`,
+    `On chatgpt.com, open <b>Settings, then Apps &amp; Connectors, then Advanced</b> and turn on <b>Developer mode</b>.`,
+    `Create a connector named <b>riOs</b>, paste your link as the server URL and set authentication to <b>none</b>.`,
+    `In a new chat, enable riOs and ask what you can cover.`] },
+  cursor: { t: 'Connect riOs to any MCP app', s: 'Cursor, Windsurf and other MCP clients use the same setup.', steps: [
+    `Get your riOs key.<br><a class="go" href="https://api.riospay.xyz/signup">Get your key</a>`,
+    `Add riOs as a remote MCP server. In Cursor, open <b>Settings, then MCP, then Add new server</b>, or add this to <code>~/.cursor/mcp.json</code>:<div class="url"><span>{"mcpServers":{"rios":{"url":"https://api.riospay.xyz/mcp","headers":{"Authorization":"Bearer &lt;your-key&gt;"}}}}</span><button data-copy>Copy</button></div>`,
+    `Ask the agent: <i>"list my riOs subscriptions"</i>.`] },
+};
+const sheet = $('sheet');
+function openSheet(ai) {
+  const g = GUIDES[ai];
+  $('shbody').innerHTML = `<h3>${g.t}</h3><p class="s">${g.s}</p><ol>${g.steps.map(s => `<li><div>${s}</div></li>`).join('')}</ol><p class="note">riOs runs on PayPal's sandbox right now, so no real money moves.</p>`;
+  sheet.querySelectorAll('.sh-tabs button').forEach(b => b.classList.toggle('on', b.dataset.ai === ai));
+  sheet.classList.add('open');
+}
+document.querySelectorAll('[data-ai]').forEach(b => b.addEventListener('click', () => openSheet(b.dataset.ai)));
+sheet.querySelector('.bd').onclick = sheet.querySelector('.close').onclick = () => sheet.classList.remove('open');
+addEventListener('keydown', e => { if (e.key === 'Escape') sheet.classList.remove('open'); });
+$('shbody').addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  navigator.clipboard?.writeText(b.previousElementSibling.textContent).then(() => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1500); });
+});
+
+// demo video
+$('vid').innerHTML = `<video src="day1.mp4" poster="day1-poster.jpg" muted autoplay loop playsinline controls preload="metadata"></video>`;
+
+// reveal
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll('.rv').forEach((el, i) => { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
+</script>
+</body>
+</html>
