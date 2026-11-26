@@ -3,7 +3,7 @@
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export const MARK = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#EAF6FF"/><g transform="translate(60 60) scale(.82) translate(-60 -62)"><g transform="translate(60 62)"><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#BFE3FB" transform="translate(-14 -10) rotate(-34) skewY(6)"/><rect x="-34" y="-40" width="64" height="74" rx="14" fill="#98D5FD" transform="translate(-7 -5) rotate(-24) skewY(6)"/><g transform="skewY(-17)"><rect x="-30" y="-30" width="66" height="72" rx="14" fill="#111A24"/><path d="M-8 26 V4 Q-8 -8 4 -10 L18 -12" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g></g></g></svg>`;
+export const MARK = `<img src="/icon.png" alt="" width="30" height="30">`;
 
 export const CSS = `
 :root{--ink:#070D14;--card:rgba(16,28,42,.62);--line:rgba(152,213,253,.14);--text:#EEF5FB;--muted:#93A6B8;--sky:#98D5FD;--cobalt:#2F7BFF;--ok:#7BE0B0;--warn:#FFC978;--bad:#FF8A8A;
@@ -18,7 +18,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.03em;line-height:1.05}
 em.s{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;color:var(--sky);letter-spacing:-.01em}
 .top{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:16px 20px}
 .brand{display:flex;align-items:center;gap:10px;font:700 21px var(--display);letter-spacing:-.02em;text-decoration:none}
-.brand svg{width:30px;height:30px}
+.brand svg,.brand img{width:30px;height:30px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
 .badge{font:600 11px var(--body);letter-spacing:.1em;text-transform:uppercase;padding:5px 9px;border-radius:999px;background:rgba(255,201,120,.12);color:var(--warn);border:1px solid rgba(255,201,120,.25)}
 .wrap{max-width:560px;margin:0 auto;padding:24px 20px 60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}

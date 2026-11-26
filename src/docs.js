@@ -141,7 +141,7 @@ ${code(`curl -s ${publicUrl}/v1/subscriptions -H "Authorization: Bearer <your-ke
 <section id="limits"><h2>Limits &amp; roadmap</h2>
 <ul class="lim"><li><b>Sandbox only.</b> Live mode is blocked in code until riOs is registered and approved for live Payouts.</li>
 <li><b>Providers need PayPal.</b> Payouts only reach PayPal accounts. Netflix, Spotify and other big brands come next through virtual cards: one card per subscription, topped up from the locked balance on renewal day.</li>
-<li><b>Limits.</b> Up to 24 months per funding, $1–$1,000 a month, 25 subscriptions per account.</li>
+<li><b>Limits.</b> Up to 24 months per funding, $1 to $1,000 a month, 25 subscriptions per account.</li>
 <li><b>Coming:</b> renewal notifications, more ways to fund (cards, bank, local rails), and gifting a subscription to someone else.</li></ul></section>
 
 <section id="source"><h2>Source code</h2><p>riOs is open source (MIT) with zero dependencies: Node 20+, PayPal REST, MCP.</p>
