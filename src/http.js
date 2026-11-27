@@ -9,7 +9,7 @@
 import { handleMessage, SERVER_INFO } from './mcp.js';
 import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
 import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage, proofPage } from './web.js';
-import { runStressStep, stressReport } from './stress.js';
+import { runStressStep, runPaydayStep, stressReport } from './stress.js';
 import { timingSafeEqual } from 'node:crypto';
 import { docsPage } from './docs.js';
 
@@ -41,7 +41,7 @@ export function createHandler({ vault, config, store, paypal }) {
       if (path === '/admin/stress') {
         const k = url.searchParams.get('key') || bearer(req) || '';
         if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });
-        try { return json(res, 200, await runStressStep({ vault, store, paypal, config }, { payee: url.searchParams.get('payee') })); }
+        try { return json(res, 200, url.searchParams.get('run') === '2' ? await runPaydayStep({ vault, store, paypal, config }) : await runStressStep({ vault, store, paypal, config }, { payee: url.searchParams.get('payee') })); }
         catch (e) { console.error('[rios] stress step failed:', e); return json(res, 502, { error: e.message, details: e.details || null }); }
       }
 

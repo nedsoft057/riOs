@@ -303,8 +303,26 @@ export function proofPage(r) {
   const pill = s => `<span class="pp ${s === 'PAID' || s === 'COMPLETED' ? 'ok' : s === 'FAILED' ? 'bad' : 'wait'}">${esc(s === 'COMPLETED' ? 'Completed' : s === 'PAID' ? 'Paid' : s.charAt(0) + s.slice(1).toLowerCase())}</span>`;
   const kind = { funding: 'Funding', refund: 'Refund', renewal: 'Renewal payout' };
   const api = { funding: 'Orders v2 · capture', refund: 'Payments v2 · refund', renewal: 'Payouts v1' };
-  const rows = r.tx.map((t, i) => `<tr><td class="n">${String(i + 1).padStart(2, '0')}</td><td><b>${kind[t.kind]}</b><span>${esc(t.what)}</span></td><td class="api">${api[t.kind]}</td><td class="mono ref">${esc(t.ref || '—')}</td><td class="amt ${t.kind === 'refund' ? 'neg' : ''}">${t.kind === 'refund' ? '−' : ''}$${esc(t.amount)}</td><td>${pill(t.status)}</td></tr>`).join('');
   const payee = String(r.payee || '').replace(/^(.{8}).*(@.*)$/, '$1…$2');
+  const runs = r.runs || [];
+  let n = 0;
+  const table = run => `<div class="tbl"><table><thead><tr><th>#</th><th>Transaction</th><th>PayPal API</th><th>PayPal ID</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead><tbody>${r.tx.filter(t => (t.run || 1) === run).map(t => `<tr><td class="n">${String(++n).padStart(3, '0')}</td><td><b>${kind[t.kind]}</b><span>${esc(t.what)}</span></td><td class="api">${api[t.kind]}</td><td class="mono ref">${esc(t.ref || '—')}</td><td class="amt ${t.kind === 'refund' ? 'neg' : ''}">${t.kind === 'refund' ? '−' : ''}$${esc(t.amount)}</td><td>${pill(t.status)}</td></tr>`).join('')}</tbody></table></div>`;
+  const how = {
+    1: () => `<div class="how">
+  <div><b>Lock</b><p>10 subscriptions, each funded for 3 months. Paid with PayPal sandbox test cards so the run needs no buyer login; real users approve in PayPal.</p></div>
+  <div><b>Cancel</b><p>5 extra deposits were cancelled inside the 3-day window. riOs refunded what hadn't been paid out, straight back to the card.</p></div>
+  <div><b>Renew</b><p>Three monthly renewal runs on a simulated clock, so 3 months happen in minutes. Each payout went to ${esc(payee)} via PayPal Payouts.</p></div>
+</div>`,
+    2: run => `<div class="how">
+  <div><b>Paydays</b><p>Money arrived on three paydays: ${(run.paydays || []).map(p => `$${esc(p.budget)}`).join(', ')}. Each time riOs's own budget planner split it across 5 subscriptions that renew on different days of the month.</p></div>
+  <div><b>Mistakes</b><p>3 deposits made by mistake were cancelled inside the 3-day window and refunded in full.</p></div>
+  <div><b>Runs dry</b><p>Six monthly renewal runs. Once a subscription's money ran out, riOs held the renewal back instead of paying it: ${(run.held || []).length} renewals correctly held, ${run.counts.failed} failed.</p></div>
+</div>`,
+  };
+  const sections = runs.map(run => `
+<div class="run"><div class="eyebrow">Run ${run.run} · ${esc(run.title)}</div><h2 class="h2">${run.counts.total} transactions. ${run.counts.failed ? `${run.counts.failed} failed.` : 'None lost.'}</h2></div>
+${how[run.run] ? how[run.run](run) : ''}
+${table(run.run)}`).join('');
   return shell('Stress test', `
 <style>
 .pg{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
@@ -319,26 +337,22 @@ td span{display:block;color:var(--muted);font-size:13px}td.n{color:#5E7385;font:
 td.api{color:var(--muted);font-size:13px;white-space:nowrap}td.ref{font-size:12px;color:#CFE0EE}
 td.amt{font-weight:650;white-space:nowrap;text-align:right}td.amt.neg{color:var(--warn)}
 .pp{display:inline-block;padding:4px 9px;border-radius:999px;font:600 12px var(--body)}.pp.ok{background:rgba(123,224,176,.12);color:var(--ok)}.pp.bad{background:rgba(255,138,138,.12);color:var(--bad)}.pp.wait{background:rgba(255,201,120,.12);color:var(--warn)}
-.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 28px}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 20px}
 .how div{padding:18px;border-radius:20px;border:1px solid var(--line)}.how b{display:block;margin-bottom:4px}.how p{color:var(--muted);font-size:14px}
+.run{margin:48px 0 16px}.h2{font:700 28px var(--display);letter-spacing:-.02em;margin-top:6px}
 @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.how{grid-template-columns:1fr}}
 </style>
 <div class="pg">
 <div class="eyebrow">Stress test · PayPal sandbox</div>
 <h1 class="title" style="max-width:720px">${c.total} real transactions. <em class="s">${c.failed ? `${c.failed} failed.` : 'None lost.'}</em></h1>
-<p class="lead" style="max-width:640px">We ran riOs end to end against PayPal's sandbox: ${c.funding} deposits locked, ${c.refund} refunded inside the 3-day window, and ${c.renewal} renewals paid out over three months. Every row below is a real PayPal transaction ID.</p>
+<p class="lead" style="max-width:660px">We run riOs end to end against PayPal's sandbox, in rounds that each test something new: ${c.funding} deposits locked, ${c.refund} refunded inside the 3-day window, ${c.renewal} renewals paid out${r.held ? `, and ${r.held} renewals held back when the money ran out` : ''}. Every row below is a real PayPal transaction ID.</p>
 <div class="stats">
   <div class="stat"><b>${c.total}</b><span>PayPal transactions</span></div>
   <div class="stat"><b>$${esc(r.volume.funding)}</b><span>locked across ${c.funding} deposits</span></div>
   <div class="stat"><b>${c.paid}/${c.renewal}</b><span>renewals paid · $${esc(r.volume.renewal)}</span></div>
   <div class="stat"><b>$${esc(r.volume.refund)}</b><span>refunded in ${c.refund} cancels</span></div>
 </div>
-<div class="how">
-  <div><b>Lock</b><p>10 subscriptions, each funded for 3 months. Paid with PayPal sandbox test cards so the run needs no buyer login; real users approve in PayPal.</p></div>
-  <div><b>Cancel</b><p>5 extra deposits were cancelled inside the 3-day window. riOs refunded what hadn't been paid out, straight back to the card.</p></div>
-  <div><b>Renew</b><p>Three monthly renewal runs on a simulated clock, so 3 months happen in minutes. Each payout went to ${esc(payee)} via PayPal Payouts.</p></div>
-</div>
-<div class="tbl"><table><thead><tr><th>#</th><th>Transaction</th><th>PayPal API</th><th>PayPal ID</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>
-<p class="small muted" style="margin-top:16px">Status ${r.phase === 'done' ? `final · finished ${esc((r.finishedAt || '').slice(0, 16).replace('T', ' '))} UTC` : `still running (${esc(r.phase)})`}. Sandbox only: no real money moved. Raw data: <a href="/proof.json" style="color:var(--sky)">/proof.json</a></p>
+${sections}
+<p class="small muted" style="margin-top:16px">Status ${r.phase === 'done' ? `final · last run finished ${esc((r.finishedAt || '').slice(0, 16).replace('T', ' '))} UTC` : `still running (${esc(r.phase)})`}. Sandbox only: no real money moved. Raw data: <a href="/proof.json" style="color:var(--sky)">/proof.json</a></p>
 </div>`, { wide: true });
 }
