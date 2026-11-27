@@ -158,8 +158,36 @@ const PAYDAY_SUBS = [['Music stream', '10.99', 3], ['Design tool', '15.00', 8], 
 const PAYDAYS = { pay1: '120.00', pay2: '60.00', pay3: '80.00' };
 const PAYDAY_STEPS = ['setup', 'pay1', 'win0', 'win1', 'pay2', 'mistakes', 'win2', 'pay3', 'win3', 'win4', 'win5', 'sync', 'done'];
 
-export async function runPaydayStep({ vault, store, paypal, config }, { budgetMs = 45000 } = {}) {
+export async function runPaydayStep(ctx, opts = {}) {
+  const { store, config } = ctx;
   if (config.paypal.env !== 'sandbox') throw new Error('The stress test only runs on the PayPal sandbox');
+  if (opts.reset) {
+    // Set an attempt aside (it stays in the ledger, but the proof page stops counting it) and start clean.
+    return store.transact(db => {
+      db.meta = db.meta || {};
+      if (db.meta.stress2) { (db.meta.stress2Void ||= []).push({ ...db.meta.stress2, voidedAt: new Date().toISOString() }); parkSubs(db, db.meta.stress2.userId); }
+      delete db.meta.stress2; delete db.meta.stress2Lock;
+      return { phase: 'reset', did: ['run 2 cleared; load again without reset to start fresh'] };
+    });
+  }
+  // One step at a time: a reload while a step is still running must not start a second one.
+  const me = Math.random().toString(36).slice(2);
+  const got = await store.transact(db => {
+    db.meta = db.meta || {};
+    const l = db.meta.stress2Lock;
+    if (l && l.until > Date.now()) return false;
+    db.meta.stress2Lock = { by: me, until: Date.now() + 70000 };
+    return true;
+  });
+  if (!got) return { phase: 'busy', did: ['A step is still running. Wait about a minute, then reload.'] };
+  try { return await paydayStep(ctx, opts); }
+  finally { await store.transact(db => { if (db.meta.stress2Lock?.by === me) delete db.meta.stress2Lock; }); }
+}
+
+// Test accounts must never be picked up by the real daily renewal run afterwards.
+function parkSubs(db, userId) { for (const s of db.subscriptions) if (userId && s.userId === userId && s.status === 'active') s.status = 'paused'; }
+
+async function paydayStep({ vault, store, paypal, config }, { budgetMs = 45000 } = {}) {
   const started = Date.now(); const out = [];
   const time = () => Date.now() - started < budgetMs;
   let st = await store.transact(db => (db.meta = db.meta || {}, db.meta.stress2 ||= { phase: 'setup', card: 0, plans: {}, deps: {}, held: [] }, JSON.parse(JSON.stringify(db.meta.stress2))));
@@ -230,6 +258,7 @@ export async function runPaydayStep({ vault, store, paypal, config }, { budgetMs
       out.push(`synced ${r.synced} payouts: ${r.paid} paid, ${r.failed} failed`);
       const open = await store.transact(db => db.payments.filter(p => p.userId === u.id && ['pending', 'unclaimed', 'submitting'].includes(p.status)).length);
       if (open) break;
+      await store.transact(db => parkSubs(db, u.id));
       st = await save({ phase: 'done', finishedAt: new Date().toISOString() });
     }
   }

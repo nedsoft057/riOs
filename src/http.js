@@ -41,7 +41,7 @@ export function createHandler({ vault, config, store, paypal }) {
       if (path === '/admin/stress') {
         const k = url.searchParams.get('key') || bearer(req) || '';
         if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });
-        try { return json(res, 200, url.searchParams.get('run') === '2' ? await runPaydayStep({ vault, store, paypal, config }) : await runStressStep({ vault, store, paypal, config }, { payee: url.searchParams.get('payee') })); }
+        try { return json(res, 200, url.searchParams.get('run') === '2' ? await runPaydayStep({ vault, store, paypal, config }, { reset: url.searchParams.get('reset') === '1' }) : await runStressStep({ vault, store, paypal, config }, { payee: url.searchParams.get('payee') })); }
         catch (e) { console.error('[rios] stress step failed:', e); return json(res, 502, { error: e.message, details: e.details || null }); }
       }
 
