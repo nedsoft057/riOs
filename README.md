@@ -33,9 +33,9 @@ Every money-moving call sends a `PayPal-Request-Id`, so a retry can never charge
 
 **Other tools:** Node.js (no framework), Vercel (hosting + cron), Upstash Redis (storage).
 
-## Stress tested: 50 real PayPal sandbox transactions
+## Stress tested: 95 real PayPal sandbox transactions
 
-We ran riOs end to end against the PayPal sandbox through the same code paths real users hit: **15 deposits locked** (Orders v2 capture), **5 refunds** inside the 3-day window (Payments v2 refund) and **30 of 30 renewals paid** (Payouts v1) across three months on a simulated clock. 0 failed, 0 lost. Every PayPal transaction ID is public at **[api.riospay.xyz/proof](https://api.riospay.xyz/proof)** ([JSON](https://api.riospay.xyz/proof.json)). The run lives in [`src/stress.js`](src/stress.js) and only ever touches its own test account.
+We test riOs end to end against the PayPal sandbox through the same code paths real users hit, in rounds that each try something new. **Run 1** locked 15 deposits, refunded 5 inside the 3-day window and paid 30 of 30 renewals over three months. **Run 2 (Payday)** sent three uneven paydays through the budget planner across 5 subscriptions with different renewal days, refunded 3 mistaken deposits, paid 24 of 24 renewals over six months and correctly held back 6 renewals once their money ran out. Totals: **33 deposits** (Orders v2 capture), **8 refunds** (Payments v2 refund), **54 of 54 renewals paid** (Payouts v1). 0 failed, 0 lost. Every PayPal transaction ID is public at **[api.riospay.xyz/proof](https://api.riospay.xyz/proof)** ([JSON](https://api.riospay.xyz/proof.json)). The runs live in [`src/stress.js`](src/stress.js) and only ever touch their own test accounts.
 
 ## How the money moves
 
