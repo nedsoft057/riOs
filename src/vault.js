@@ -2,7 +2,10 @@
 //
 // Money rules:
 // - A deposit funds one subscription for N months. The user approves it once in PayPal.
-// - The fee (feeBps, 0 during the hackathon) is taken from every deposit and never refunded.
+// - Pricing (see src/pricing.js): riOs charges a percentage of ONE month's price the first time a
+//   subscription is funded (firstMonthFeeBps, 3% at launch, 0 during the beta). Every later deposit
+//   for that subscription is free. The fee is never refunded. A legacy per-deposit fee (feeBps)
+//   is still supported but off by default.
 // - For cancelWindowHours after a deposit is captured, the user can cancel it and get back
 //   whatever of it hasn't been paid out yet. After that it is locked.
 // - On each renewal date, exactly one month's amount is paid to the subscription's payee via
@@ -100,21 +103,35 @@ export class Vault {
   }
 
   // ---------- funding ----------
-  quote(monthlyCents, months) {
+  // firstMonth: true when this is the subscription's first funding, so the one-time fee applies.
+  quote(monthlyCents, months, firstMonth = false) {
     const net = monthlyCents * months;
     const bps = this.cfg.feeBps;
-    const fee = bps > 0 ? Math.ceil(net * bps / (10000 - bps)) : 0; // fee is bps of the total deposit
-    return { net, fee, gross: net + fee };
+    const depositFee = bps > 0 ? Math.ceil(net * bps / (10000 - bps)) : 0; // legacy: bps of the total deposit
+    const fbps = this.cfg.firstMonthFeeBps || 0;
+    const firstMonthFee = firstMonth && fbps > 0 ? Math.ceil(monthlyCents * fbps / 10000) : 0;
+    const fee = depositFee + firstMonthFee;
+    return { net, fee, gross: net + fee, firstMonthFee, depositFee };
+  }
+
+  // The first-month fee is charged once per subscription: on its first funding that wasn't
+  // abandoned (failed or cancelled before approval).
+  firstMonthDue(db, subscriptionId) {
+    return !db.deposits.some(d => d.subscriptionId === subscriptionId && !['failed', 'cancelled'].includes(d.status));
   }
 
   async quoteFunding(user, subscriptionId, months) {
     months = this.checkMonths(months);
     return this.store.transact(db => {
       const sub = ownSub(db, user, subscriptionId);
-      const q = this.quote(sub.monthlyCents, months);
+      const first = this.firstMonthDue(db, sub.id);
+      const q = this.quote(sub.monthlyCents, months, first);
       return {
         subscription: sub.name, months, monthly: money(sub.monthlyCents), currency: sub.currency,
-        covered_amount: money(q.net), fee: money(q.fee), fee_percent: this.cfg.feeBps / 100, total_to_pay: money(q.gross),
+        covered_amount: money(q.net), fee: money(q.fee), fee_percent: this.cfg.feeBps / 100,
+        first_funding: first, first_month_fee: money(q.firstMonthFee), first_month_fee_percent: (this.cfg.firstMonthFeeBps || 0) / 100,
+        total_to_pay: money(q.gross),
+        fee_note: first ? 'riOs charges its fee once, on the first month of a new subscription. Every later month you add is free.' : 'No fee: this subscription has already been funded once, so extra months are free.',
         renewals_covered: renewalDates(sub.nextRenewal, months),
       };
     });
@@ -129,10 +146,10 @@ export class Vault {
       if (sub.status !== 'active') throw new UserError('This subscription is paused. Check its status first.');
       const open = db.deposits.filter(d => d.subscriptionId === sub.id && d.status === 'pending');
       if (open.length >= 3) throw new UserError('There are already 3 fundings waiting for approval for this subscription. Approve or cancel those first.');
-      const q = this.quote(sub.monthlyCents, months);
+      const q = this.quote(sub.monthlyCents, months, this.firstMonthDue(db, sub.id));
       const d = {
         id: id('dep'), userId: user.id, subscriptionId: sub.id, subscriptionName: sub.name, months,
-        netCents: q.net, feeCents: q.fee, grossCents: q.gross, remainingCents: 0, currency: sub.currency,
+        netCents: q.net, feeCents: q.fee, firstMonthFeeCents: q.firstMonthFee, grossCents: q.gross, remainingCents: 0, currency: sub.currency,
         status: 'pending', orderId: null, approveUrl: null, captureId: null,
         createdAt: this.now().toISOString(), lockedAt: null, cancelUntil: null, refundId: null,
       };
@@ -262,7 +279,8 @@ export class Vault {
       }
       if (!subs.length) throw new UserError('No active subscriptions to plan for. Add one first.');
       const months = Object.fromEntries(subs.map(s => [s.id, 0]));
-      const total = () => subs.reduce((t, s) => t + (months[s.id] ? this.quote(s.monthlyCents, months[s.id]).gross : 0), 0);
+      const first = Object.fromEntries(subs.map(s => [s.id, this.firstMonthDue(db, s.id)]));
+      const total = () => subs.reduce((t, s) => t + (months[s.id] ? this.quote(s.monthlyCents, months[s.id], first[s.id]).gross : 0), 0);
       let progress = true;
       while (progress) {
         progress = false;
@@ -278,7 +296,7 @@ export class Vault {
         const covered = Math.floor(balanceOf(deps) / s.monthlyCents);
         const startFrom = addMonths(s.nextRenewal, covered);
         return { subscription_id: s.id, name: s.name, monthly: money(s.monthlyCents), add_months: months[s.id],
-          cost: months[s.id] ? money(this.quote(s.monthlyCents, months[s.id]).gross) : '0.00',
+          cost: months[s.id] ? money(this.quote(s.monthlyCents, months[s.id], first[s.id]).gross) : '0.00',
           covered_through_after: months[s.id] || covered ? addDays(addMonths(startFrom, months[s.id]), -1) : null };
       });
       return { budget: money(budgetCents), will_spend: money(used), left_over: money(budgetCents - used), plan,

@@ -318,3 +318,45 @@ test('rotating a key keeps the account and kills the old key', async () => {
   assert.equal(u2.id, user.id);
   assert.equal((await vault.listSubscriptions(u2)).length, 1);
 });
+
+test('first-month fee is charged once per subscription, later months are free', async () => {
+  const { vault } = setup({ RIOS_FIRST_MONTH_FEE_BPS: '300' });
+  const { user } = await vault.createUser('A');
+  const sub = await vault.addSubscription(user, { name: 'ChatGPT Plus', payee_email: 'provider@example.com', monthly_amount: '20', next_billing_date: '2026-11-15' });
+  const q1 = await vault.quoteFunding(user, sub.subscription_id, 3);
+  assert.equal(q1.first_funding, true);
+  assert.equal(q1.first_month_fee, '0.60'); // 3% of one month ($20), not of the whole deposit
+  assert.equal(q1.total_to_pay, '60.60');
+  const f1 = await vault.startFunding(user, sub.subscription_id, 3);
+  pp.approve(orderIdFrom(f1.approve_url));
+  await vault.confirmFunding(f1.deposit_id, { userId: user.id });
+  const q2 = await vault.quoteFunding(user, sub.subscription_id, 3);
+  assert.equal(q2.first_funding, false);
+  assert.equal(q2.fee, '0.00');
+  assert.equal(q2.total_to_pay, '60.00');
+  const f2 = await vault.startFunding(user, sub.subscription_id, 3);
+  assert.equal(f2.fee, '0.00');
+});
+
+test('an abandoned first funding does not use up the first-month fee', async () => {
+  const { vault } = setup({ RIOS_FIRST_MONTH_FEE_BPS: '300' });
+  const { user } = await vault.createUser('A');
+  const sub = await vault.addSubscription(user, { name: 'Figma', payee_email: 'provider@example.com', monthly_amount: '15' });
+  const f = await vault.startFunding(user, sub.subscription_id, 2);
+  await vault.cancelDeposit(user, f.deposit_id); // cancelled before approval
+  const q = await vault.quoteFunding(user, sub.subscription_id, 2);
+  assert.equal(q.first_funding, true);
+  assert.equal(q.first_month_fee, '0.45');
+});
+
+test('pricing is public and free during the beta', async () => {
+  const { pricing } = await import('../src/pricing.js');
+  const beta = pricing({ firstMonthFeeBps: 0, cardFeeCents: 150, currency: 'USD' });
+  assert.equal(beta.beta, true);
+  assert.equal(beta.launch_first_month_fee_percent, 3);
+  assert.equal(beta.card.one_time_fee, '1.50');
+  assert.equal(beta.example.first_funding.total, '60.60');
+  const live = pricing({ firstMonthFeeBps: 300, cardFeeCents: 150, currency: 'USD' });
+  assert.equal(live.beta, false);
+  assert.equal(live.first_month_fee_percent, 3);
+});

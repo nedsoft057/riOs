@@ -8,6 +8,7 @@
 //   GET  /health
 import { handleMessage, SERVER_INFO } from './mcp.js';
 import { ICON_PNG_256, ICON_PNG_48 } from './icon.js';
+import { pricing } from './pricing.js';
 import { homePage, signupPage, keyPage, coveredPage, messagePage, consolePage, proofPage } from './web.js';
 import { runStressStep, runPaydayStep, stressReport } from './stress.js';
 import { timingSafeEqual } from 'node:crypto';
@@ -32,6 +33,7 @@ export function createHandler({ vault, config, store, paypal }) {
       if (path.startsWith('/v1/')) return api(req, res, path, url);
       if (path === '/proof' && req.method === 'GET') return html(res, 200, proofPage(await stressReport(store)));
       if (path === '/proof.json' && req.method === 'GET') return json(res, 200, await stressReport(store));
+      if (path === '/pricing.json' && req.method === 'GET') return json(res, 200, pricing(config));
       if (path === '/admin/rekey') {
         const k = url.searchParams.get('key') || '';
         if (!config.stressKey || !safeEq(k, config.stressKey)) return json(res, 401, { error: 'Unauthorized' });

@@ -49,7 +49,7 @@ export const TOOLS = [
   {
     name: 'rios_quote',
     title: 'Quote a funding',
-    description: 'Work out what it costs to cover a subscription for a number of months, and which renewal dates that covers. Does not charge anything.',
+    description: 'Work out what it costs to cover a subscription for a number of months, and which renewal dates that covers. riOs charges its fee only once, on the first month of a new subscription; later months are free. Does not charge anything.',
     inputSchema: { type: 'object', additionalProperties: false, required: ['subscription_id', 'months'], properties: {
       subscription_id: str('From rios_list_subscriptions'), months: { type: 'integer', minimum: 1, maximum: 24 },
     } },

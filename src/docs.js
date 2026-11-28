@@ -65,7 +65,7 @@ export function docsPage(publicUrl) {
   <h1>Prepay what you can. <em class="s">Your AI handles the rest.</em></h1>
   <p class="lead">riOs is an MCP server. Connect it to Claude, ChatGPT, Cursor or any MCP client and your AI can cover your subscriptions for the months you can afford. You approve once in PayPal, riOs locks the money for that subscription and pays every renewal on its due date.</p>
   <div class="cta"><a class="btn" href="/signup">Get your key</a><a class="btn ghost" href="/app">Open console</a><a class="btn ghost" href="${REPO}">GitHub</a></div>
-  <div class="facts"><div><b>9</b><span>MCP tools</span></div><div><b>3</b><span>PayPal APIs</span></div><div><b>0%</b><span>fee during the hackathon</span></div><div><b>3 days</b><span>to cancel for a full refund</span></div></div>
+  <div class="facts"><div><b>9</b><span>MCP tools</span></div><div><b>3</b><span>PayPal APIs</span></div><div><b>3%</b><span>of the first month only. Free in beta</span></div><div><b>3 days</b><span>to cancel for a full refund</span></div></div>
 </section>
 
 <section id="quickstart"><h2>Quickstart</h2>

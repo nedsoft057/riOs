@@ -29,7 +29,12 @@ export function loadConfig(env = process.env) {
     publicUrl: (env.PUBLIC_URL || `http://localhost:${env.PORT || 8787}`).replace(/\/$/, ''),
     port: Number(env.PORT || 8787),
     currency: env.RIOS_CURRENCY || 'USD',
-    // Fee in basis points of the deposit (200 = 2%). Off for the hackathon.
+    // Pricing (see src/pricing.js). First-month fee in basis points of one month's price, charged once
+    // per subscription (300 = 3% at launch). 0 while riOs is in beta.
+    firstMonthFeeBps: Number(env.RIOS_FIRST_MONTH_FEE_BPS || 0),
+    // One-time riOs Card fee in cents (card layer is on the roadmap; published, not charged yet).
+    cardFeeCents: Number(env.RIOS_CARD_FEE_CENTS || 150),
+    // Legacy per-deposit fee in basis points of the deposit (200 = 2%). Off by default.
     feeBps: Number(env.RIOS_FEE_BPS || 0),
     // PayPal account riOs collects into; riOs refuses to pay it as a provider. Learned automatically if unset.
     merchantEmail: (env.RIOS_MERCHANT_EMAIL || '').trim().toLowerCase() || null,
